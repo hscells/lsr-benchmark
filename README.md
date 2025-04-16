@@ -49,7 +49,7 @@ for doc in dataset.docs_iter(embedding=None):
 
 ## Format of Document Texts
 
-Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
+Each document consists of a `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
 
 - doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
 - segments:
@@ -59,7 +59,7 @@ Each document consists of an `doc_id` and a list of text `segments` that are sho
 
 ## Format of Document Embeddings
 
-Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages would be represented as:
+Each document consists of a `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages would be represented as:
 
 - doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
 - segments:
@@ -69,4 +69,4 @@ Each document consists of an `doc_id` and a list of text `segments` that are sho
 
 # Evaluation
 
-The evaluation methodology aims to encourage the development of diverse and novel measures, as a suitable intertpretation of efficiency for a target task highly depends on the application and its context. Therefore, we aim to measure as many XY as possible in a standardized way with the [tirex-tracker](https://github.com/tira-io/tirex-tracker/) to ensure that XY. This methodology and related aspects were developed as part of the [ReNeuIR workshop series](https://reneuir.org/) held at SIGIR [2022](https://dl.acm.org/doi/abs/10.1145/3477495.3531704), [2023](https://dl.acm.org/doi/abs/10.1145/3539618.3591922), [2024](https://dl.acm.org/doi/abs/10.1145/3626772.3657994), and [2025](https://reneuir.org/).
+The evaluation methodology encourages the development of diverse and novel measures, as a suitable interpretation of efficiency for a target task highly depends on the application and its context. Therefore, we aim to measure as many XY as possible in a standardized way with the [tirex-tracker](https://github.com/tira-io/tirex-tracker/) to ensure that XY. This methodology and related aspects were developed as part of the [ReNeuIR workshop series](https://reneuir.org/) held at SIGIR [2022](https://dl.acm.org/doi/abs/10.1145/3477495.3531704), [2023](https://dl.acm.org/doi/abs/10.1145/3539618.3591922), [2024](https://dl.acm.org/doi/abs/10.1145/3626772.3657994), and [2025](https://reneuir.org/).
