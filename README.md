@@ -1,5 +1,5 @@
-<img width="100%" src="assets/banner.png" alt="The lsr_benchmark banner image">
-<h1 align="center">lsr_benchmark</h1>
+<img width="100%" src="assets/banner.png" alt="The lsr-benchmark banner image">
+<h1 align="center">lsr-benchmark</h1>
 
 
 [![CI](https://img.shields.io/github/actions/workflow/status/reneuir/lsr_benchmark/ci.yml?branch=master&style=flat-square)](https://github.com/reneuir/lsr_benchmark/actions/workflows/ci.yml)
@@ -13,27 +13,55 @@
 
 [CLI](#command-line-tool)&emsp;•&emsp;[Python API](#cc-api)&emsp;•&emsp;[Citation](#citation)
 
-The lsr_benchmark is ...
+The lsr-benchmark aims to support holisitc evaluations of the lexical sparse retrieval paradigm to contrast efficiency and effectiveness accross diverse retrieval scenarios.
 
 # Task
 
-Description of the task ...
+The lexical sparse retrieval paradigm conducts retrieval in three steps:
 
+1. Documents are segmented into passages so that the passages can be processed by pre-trained transformers.
+2. Documents and queries are embedded into a sparse lexical embedding.
+3. Retrieval systems create an index of the document embeddings to return a ranking for each embedded query.
+
+You can submit solutions to step 2 (i.e., models that embed documents and queries into sparse embeddings) and/or solutions to step 3 (i.e., retrieval systems). The idea is then to validate all combinations of embeddings with all retrieval systems to identify which solutions work well for which use case, taking different notions of efficiency/effectiveness trade-offs into consideration. The passage segmentation for step 1 is open source (i.e., created via `lsr-benchmark segment-corpus <IR-DATASETS-ID>`) but fixed for this task.
 
 # Data
 
-The formats for data inputs and outputs aims to support slicing and dicing diverse query and document distributions while enabling caching, allowing for GreenIR research.
+The formats for data inputs and outputs aim to support slicing and dicing diverse query and document distributions while enabling caching, allowing for GreenIR research.
 
+You can slice and dice the document texts and document embeddings via the API. The document texts for private corpora are only available within the [TIRA sandbox](https://docs.tira.io/participants/python-client.html) whereas the document embeddings are publicly available for all corpora (as one can not re-construct the original documents from sparse embeddings).
 
-Document representation:
+```
+dataset = lsr_benchmark.load('<IR-DATASETS-ID>')
 
-Default representation: first-passage
+# process the document texts:
+for doc in dataset.docs_iter(embedding=None):
+    doc # namedtuple<doc_id, segments.text>
 
-`lsr_benchmark.load(passages='first-passage')`
-`lsr_benchmark.load(passages='passages-concatenated')`
-`lsr_benchmark.load(passages='passages-stride-concatenated')`
+# process the document embeddings:
+for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>'):
+    doc # namedtuple<doc_id, segments.embedding>
+```
 
-...
+## Format of Document-Texts
+
+Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages would be represented as:
+
+- doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
+- segments:
+  - {"start": 1, "end": 2, "text": "text-of-passage-1 text-of-passage-2"}
+  - {"start": 2, "end": 3, "text": "text-of-passage-2 text-of-passage-3"}
+  - {"start": 3, "end": 4, "text": "text-of-passage-3 text-of-passage-4"}
+
+## Format of Document Embeddings
+
+Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages would be represented as:
+
+- doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
+- segments:
+  - {"start": 1, "end": 2, "embedding": {"term-1": 0.123, "term-2": 0.912}}
+  - {"start": 2, "end": 3, "embedding": {"term-1": 0.421, "term-3": 0.743}}
+  - {"start": 3, "end": 4, "embedding": {"term-2": 0.108, "term-4": 0.043}}
 
 # Evaluation
 
