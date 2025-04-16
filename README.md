@@ -45,7 +45,7 @@ for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>'):
 
 ## Format of Document-Texts
 
-Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages would be represented as:
+Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
 
 - doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
 - segments:
