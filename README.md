@@ -34,13 +34,17 @@ You can slice and dice the document texts and document embeddings via the API. T
 ```
 dataset = lsr_benchmark.load('<IR-DATASETS-ID>')
 
+# process the document embeddings:
+for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>', passage_aggregation="first-passage"):
+    doc # namedtuple<doc_id, embedding>
+
+# process the document embeddings for all segments:
+for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>'):
+    doc # namedtuple<doc_id, segments.embedding>
+
 # process the document texts:
 for doc in dataset.docs_iter(embedding=None):
     doc # namedtuple<doc_id, segments.text>
-
-# process the document embeddings:
-for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>'):
-    doc # namedtuple<doc_id, segments.embedding>
 ```
 
 ## Format of Document-Texts
