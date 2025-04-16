@@ -49,7 +49,7 @@ for doc in dataset.docs_iter(embedding=None):
 
 ## Format of Document Texts
 
-Each document consists of a `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
+Following the processing of [MS MARCO v2.1](https://trec-rag.github.io/annoucements/2024-corpus-finalization/), each document consists of a `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
 
 - doc_id: 12fd3396-e4d7-4c0f-b468-5a82402b5336
 - segments:
