@@ -47,7 +47,7 @@ for doc in dataset.docs_iter(embedding=None):
     doc # namedtuple<doc_id, segments.text>
 ```
 
-## Format of Document-Texts
+## Format of Document Texts
 
 Each document consists of an `doc_id` and a list of text `segments` that are short enough to be processed by pre-trained transformers. For instance, a document that consists of 4 passages (e.g., `"text-of-passage-1 text-of-passage-2 text-of-passage-3 text-of-passage-4"`) would be represented as:
 
