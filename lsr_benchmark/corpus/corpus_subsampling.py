@@ -3,6 +3,8 @@ import gzip
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
+from tqdm import tqdm
+from glob import glob
 
 import ir_datasets
 from trectools import TrecPoolMaker, TrecRun
@@ -89,3 +91,14 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
     def __str__(self) -> str:
         return f"top-{self.depth}-run-pool"
 
+
+def create_subsample(run_dir, ir_datasets_id, depth, output_dir):
+    if not (output_dir/"subsample.json").is_file():
+        runs = [TrecRun(i) for i in tqdm(glob(f"{run_dir}/*"), "Load Runs")]
+        corpus = list(RunPoolCorpusSampler(depth).sample_corpus(ir_datasets_id, runs))
+        with open(f"{output_dir}/subsample.json", "w") as f:
+            f.write(json.dumps(corpus))
+    ret = json.loads((output_dir/"subsample.json").read_text())
+    print(len(ret))
+    return ret
+    

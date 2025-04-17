@@ -8,7 +8,7 @@ from trectools import TrecRun
 @click.argument('directory', type=Path)
 def main(directory):
     config = json.loads((directory/"config.json").read_text())
-    subsample = create_subsample(config["runs"], config["subsample_depth"])
+    subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
 
     print(directory)
 
