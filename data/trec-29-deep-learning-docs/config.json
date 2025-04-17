@@ -1,0 +1,5 @@
+{
+    "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec29/deep.documents/",
+    "ir-datasets-id": "msmarco-document/trec-dl-2020/judged",
+    "subsample_depth": 125
+}
