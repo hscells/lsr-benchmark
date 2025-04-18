@@ -8,6 +8,7 @@ from typing import Dict, List
 nlp = spacy.load("en_core_web_sm", exclude=[
                  "parser", "tagger", "ner", "attribute_ruler", "lemmatizer", "tok2vec"])
 nlp.enable_pipe("senter")
+#python -m spacy download en_core_web_sm
 nlp.max_length = 2000000  # for documents that are longer than the spacy character limit
 
 
@@ -17,7 +18,7 @@ class AbstractPassageChunker(ABC):
         pass
 
     @staticmethod
-    def chunk_document(document_sentences, sentences_word_count, passage_size=100) -> List[Dict]:
+    def chunk_document(document_sentences, sentences_word_count, passage_size=80) -> List[Dict]:
         """
         Creates the passage chunks for a given document
         """
@@ -93,4 +94,16 @@ class SpacyPassageChunker(AbstractPassageChunker):
 # code from https://github.com/grill-lab/trec-cast-tools
 def segmented_document(documents):
     chunker = SpacyPassageChunker()
-    ret = chunker.process_batch(documents)
+    ret_passages = chunker.process_batch(documents)
+    ret = {}
+
+    for k, p in ret_passages.items():
+        segments = []
+        for i in range(len(p) - 1):
+            start = p[i]
+            end = p[i+1]
+
+            segments.append({"start": start["id"], "end": end["id"], "text": (start["body"] + " " + end["body"]).strip()})
+        ret[k] = {"doc_id": k, "segments": segments}
+
+    return ret
