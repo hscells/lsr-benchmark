@@ -1,0 +1,5 @@
+{
+    "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec21/web.adhoc/",
+    "ir-datasets-id": "clueweb09/en/trec-web-2012",
+    "subsample_depth": 100
+}
