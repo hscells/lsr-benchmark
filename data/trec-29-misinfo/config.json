@@ -1,0 +1,5 @@
+{
+    "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec29/misinfo/",
+    "ir-datasets-id": "clueweb12/b13/trec-misinfo-2019",
+    "subsample_depth": 200
+}
