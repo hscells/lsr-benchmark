@@ -94,7 +94,12 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
 
 def create_subsample(run_dir, ir_datasets_id, depth, output_dir):
     if not (output_dir/"subsample.json").is_file():
-        runs = [TrecRun(i) for i in tqdm(glob(f"{run_dir}/*"), "Load Runs")]
+        runs = []
+        for i in tqdm(glob(f"{run_dir}/*"), "Load Runs"):
+            try:
+                runs.append(TrecRun(i))
+            except:
+                pass
         corpus = list(RunPoolCorpusSampler(depth).sample_corpus(ir_datasets_id, runs))
         with open(f"{output_dir}/subsample.json", "w") as f:
             f.write(json.dumps(corpus))
