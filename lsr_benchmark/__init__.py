@@ -27,8 +27,13 @@ def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     if (directory/"corpus.jsonl").is_file():
         return
-    subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
-    docs = load_docs(config["ir-datasets-id"], subsample)
+    ir_datasets_id = config["ir-datasets-id"]
+    if ir_datasets_id.startswith("clueweb"):
+        from ir_datasets_subsample import register_subsamples
+        register_subsamples()
+        ir_datasets_id = "corpus-subsamples/" + ir_datasets_id
+    subsample = create_subsample(config["runs"], ir_datasets_id, config["subsample_depth"], directory)
+    docs = load_docs(ir_datasets_id, subsample)
     docs = segmented_document(docs)
     with gzip.open(directory/"corpus.jsonl", 'wt') as f:
         for doc in docs.values():
