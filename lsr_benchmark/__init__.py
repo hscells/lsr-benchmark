@@ -1,3 +1,4 @@
+__version__ = "0.0.1"
 import click
 import json
 from pathlib import Path
@@ -11,9 +12,18 @@ import gzip
 import json
 
 
-@click.command()
+
+@click.group()
+def main():
+    pass
+
+@main.command()
+def foo():
+    print("foo")
+
+@main.command()
 @click.argument('directory', type=Path)
-def main(directory):
+def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     if (directory/"corpus.jsonl").is_file():
         return
