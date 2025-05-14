@@ -27,7 +27,7 @@ You can submit solutions to step 2 (i.e., models that embed documents and querie
 
 # Supported Corproa
 
-| Subsample | IR-DS | Partitioned | Embedding |
+| Subsample | IRDS | Partitioned | Embedding |
 |-----------|----------|----------|-----------|
 |corpus-subsamples/clueweb09/en/trec-web-2009| OK | | |
 |corpus-subsamples/clueweb09/en/trec-web-2010| OK | | |
