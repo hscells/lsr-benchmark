@@ -25,6 +25,20 @@ The lexical sparse retrieval paradigm conducts retrieval in three steps:
 
 You can submit solutions to step 2 (i.e., models that embed documents and queries into sparse embeddings) and/or solutions to step 3 (i.e., retrieval systems). The idea is then to validate all combinations of embeddings with all retrieval systems to identify which solutions work well for which use case, taking different notions of efficiency/effectiveness trade-offs into consideration. The passage segmentation for step 1 is open source (i.e., created via `lsr-benchmark segment-corpus <IR-DATASETS-ID>`) but fixed for this task.
 
+# Supported Corproa
+
+| Subsample | IR-DS | Partitioned | Embedding |
+|-----------|----------|----------|-----------|
+|corpus-subsamples/clueweb09/en/trec-web-2009| OK | | |
+|corpus-subsamples/clueweb09/en/trec-web-2010| OK | | |
+|corpus-subsamples/clueweb09/en/trec-web-2011| OK | | |
+|corpus-subsamples/clueweb09/en/trec-web-2012| OK | | |
+|corpus-subsamples/clueweb12/en/trec-web-2013| OK | | |
+|corpus-subsamples/clueweb12/en/trec-web-2014| OK | | |
+|corpus-subsamples/clueweb12/b13/trec-misinfo-2019| OK | | |
+| ... ||||
+
+
 # Data
 
 The formats for data inputs and outputs aim to support slicing and dicing diverse query and document distributions while enabling caching, allowing for GreenIR research.
