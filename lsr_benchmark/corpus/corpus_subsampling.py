@@ -41,17 +41,11 @@ class JudgmentPoolCorpusSampler(CorpusSampler):
         Returns:
             set[str]: The judged documents as sampled corpus.
         """
-        allowed_document_ids = set()
-        for run in runs:
-            for doc_id in run.run_data["docid"]:
-                allowed_document_ids.add(doc_id)
-
         qrels_iter = ir_datasets.load(ir_datasets_id).qrels_iter()
         ret = set()
 
         for qrel in qrels_iter:
-            if qrel.doc_id in allowed_document_ids:
-                ret.add(qrel.doc_id)
+            ret.add(qrel.doc_id)
 
         return ret
 
@@ -84,13 +78,13 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
         pool = TrecPoolMaker().make_pool(runs, strategy="topX", topX=self.depth).pool
 
         for docids in pool.values():
-            ret.update(docids)
+            for doc_id in docids:
+                ret.add(doc_id)
 
         return ret
 
     def __str__(self) -> str:
         return f"top-{self.depth}-run-pool"
-
 
 def create_subsample(run_dir, ir_datasets_id, depth, output_dir):
     if not (output_dir/"subsample.json").is_file():
@@ -104,6 +98,5 @@ def create_subsample(run_dir, ir_datasets_id, depth, output_dir):
         with open(f"{output_dir}/subsample.json", "w") as f:
             f.write(json.dumps(corpus))
     ret = json.loads((output_dir/"subsample.json").read_text())
-    print(len(ret))
     return ret
     
