@@ -5,6 +5,20 @@ from pathlib import Path
 from .corpus_subsampling import create_subsample
 import gzip
 import json
+import shutil
+
+import zipfile
+import os
+
+
+def zip_directory(folder_path, output_path):
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        len_prefix = len(os.path.abspath(folder_path)) + 1  # to remove the base folder path
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                abs_path = os.path.join(root, file)
+                rel_path = os.path.abspath(abs_path)[len_prefix:]
+                zipf.write(abs_path, arcname=rel_path)
 
 def load_docs(ir_datasets_id, subsample):
     ret = {}
@@ -54,7 +68,7 @@ def materialize_queries(directory, config):
     irds_loader = IrDatasetsLoader()
     ir_datasets_id = irds_id_from_config(config)
     output_jsonl = directory / "queries.jsonl"
-    output_xml = directory / "queries.jsonl"
+    output_xml = directory / "queries.xml"
 
     if not output_jsonl.exists():
         dataset = ir_datasets.load(ir_datasets_id)
@@ -68,7 +82,7 @@ def materialize_queries(directory, config):
         queries_mapped_xml = [irds_loader.map_query_as_xml(query, True) for query in dataset.queries_iter()]
         with open(output_xml, 'w') as f:
             for l in queries_mapped_xml:
-                f.write(l + '\n')
+                f.write(str(l) + '\n')
 
 def materialize_qrels(source_directory, output_qrels, config):
     ir_datasets_id = irds_id_from_config(config)
@@ -85,7 +99,6 @@ def materialize_qrels(source_directory, output_qrels, config):
     with open(output_qrels, 'w') as f:
         for qrel in dataset.qrels_iter():
             if qrel.doc_id not in document_mapping:
-                print("skip qrel " + str(qrel))
                 skipped.add(qrel.doc_id)
                 continue
             f.write(f"{qrel.query_id} 0 {document_mapping[qrel.doc_id]} {qrel.relevance}\n")
@@ -95,6 +108,11 @@ def materialize_inputs(directory, config):
     output_zip = directory / "inputs.zip"
     if output_zip.exists():
         return
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        materialize_queries(Path(tmp_dir), config)
+        shutil.copy(directory/"corpus.jsonl.gz", Path(tmp_dir)/"corpus.jsonl.gz")
+        zip_directory(tmp_dir, output_zip)
+
 
 def materialize_truths(directory, config):
     output_zip = directory / "truths.zip"
@@ -104,7 +122,5 @@ def materialize_truths(directory, config):
     with tempfile.TemporaryDirectory() as tmp_dir:
         materialize_queries(Path(tmp_dir), config)
         materialize_qrels(directory, Path(tmp_dir)/"qrels.txt", config)
-
-
-
-
+        zip_directory(tmp_dir, output_zip)
+        
