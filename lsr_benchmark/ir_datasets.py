@@ -35,13 +35,16 @@ class LsrBenchmarkQueries(BaseQueries):
     @staticmethod
     def _from_file(corpus_file):
         queries = [GenericQuery(i["qid"], i["query"]) for i in QueryProcessorFormat().all_lines(corpus_file)]
-        return queries
+        return LsrBenchmarkQueries(queries)
 
 class LsrBenchmarkDocuments(BaseDocs):
     def __init__(self, docs):
        self.__docs = docs
 
-    def docs_iter(self):
+    def docs_iter(self, embedding=None):
+        if embedding is not None:
+            raise ValueError("ToDo: implement this...")
+
         for l in self.__docs:
             yield LsrBenchmarkDocument._from_json(l)
 
