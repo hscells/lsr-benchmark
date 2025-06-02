@@ -60,6 +60,15 @@ You can submit solutions to step 2 (i.e., models that embed documents and querie
 | ... ||||
 
 
+# Setup for Local Tests
+
+This is only a temporary setup, later we will make this automated.
+
+```
+wget 'https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/inputs.zip' -O data/trec-18-web/inputs.zip
+wget 'https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/truths.zip' -O data/trec-18-web/truths.zip
+```
+
 # Data
 
 The formats for data inputs and outputs aim to support slicing and dicing diverse query and document distributions while enabling caching, allowing for GreenIR research.
