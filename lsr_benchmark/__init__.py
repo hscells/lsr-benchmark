@@ -2,8 +2,12 @@ __version__ = "0.0.1"
 import click
 import json
 from pathlib import Path
+from lsr_benchmark.ir_datasets import ensure_corpus_is_extracted
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs
 
+
+def load(ir_datasets_id: str):
+    ensure_corpus_is_extracted(ir_datasets_id)
 
 @click.group()
 def main():
