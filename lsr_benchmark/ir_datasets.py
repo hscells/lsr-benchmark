@@ -34,30 +34,35 @@ class LsrBenchmarkSegmentedDocument(NamedTuple):
 
 
 class LsrBenchmarkQueries(BaseQueries):
-    def __init__(self, queries):
-       self.__queries = queries
+    def __init__(self, queries_file):
+       self.__queries_file = queries_file
 
     def queries_iter(self):
-        for l in self.__queries:
-            yield l
+        for l in QueryProcessorFormat().all_lines(self.__queries_file):
+            yield GenericQuery(l["qid"], l["query"])
 
-    @staticmethod
-    def _from_file(corpus_file):
-        queries = [GenericQuery(i["qid"], i["query"]) for i in QueryProcessorFormat().all_lines(corpus_file)]
-        return LsrBenchmarkQueries(queries)
 
 class LsrBenchmarkDocuments(BaseDocs):
     def __init__(self, corpus_file):
-        reader = JsonlFormat()
-        reader.apply_configuration_and_throw_if_invalid({"required_fields": ["doc_id", "segments"], "max_size_mb": 2500})
-        self.__docs = reader.all_lines(corpus_file)
+        self.__corpus_file = corpus_file
+        self.__docs = None
 
     def docs_iter(self, embedding=None):
         if embedding is not None:
             raise ValueError("ToDo: implement this...")
 
-        for l in self.__docs:
+        for l in self.docs():
             yield LsrBenchmarkDocument._from_json(l)
+
+    def docs(self):
+        if not self.__docs:
+            reader = JsonlFormat()
+            reader.apply_configuration_and_throw_if_invalid({"required_fields": ["doc_id", "segments"], "max_size_mb": 2500})
+            self.__docs = reader.all_lines(self.__corpus_file)
+        return self.__docs
+
+    def docs_count(self):
+        return len([1 for i in docs_iter()])
 
 
 class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
@@ -66,14 +71,20 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
             for idx, segment in zip(range(len(doc.segments)), doc.segments):
                 yield LsrBenchmarkSegmentedDocument(f"{doc.doc_id}___{idx}___", segment)
 
+    def docs_count(self):
+        return len([1 for i in docs_iter()])
 
 class LsrBenchmarkDataset(Dataset):
     def __init__(self, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
         if queries:
-            queries = LsrBenchmarkQueries._from_file(queries)
+            queries = LsrBenchmarkQueries(queries)
 
         if qrels:
-            qrels = TrecQrels(qrels, {0: 'Not Relevant', 1: 'Relevant'})
+            qrels_file = qrels
+            class QrelsObj():
+                def stream(self):
+                    return open(qrels_file, "rb")
+            qrels = TrecQrels(QrelsObj(), {0: 'Not Relevant', 1: 'Relevant'})
 
         if docs and not segmented:
             docs = LsrBenchmarkDocuments(docs)
