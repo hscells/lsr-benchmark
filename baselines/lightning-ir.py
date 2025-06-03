@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import lsr_benchmark
+import lsr_benchmark.ir_datasets
 import click
 
 
 @click.command()
-@click.option("--dataset", type=str, required=True, help="The dataset id or a local directory.")
+@click.option("--dataset", type=click.Choice(lsr_benchmark.ir_datasets.MAPPING_OF_DATASET_IDS.keys()), required=True, help="The dataset id or a local directory.")
 @click.option("--model", type=str, required=True, help="The lightning ir model.")
 def main(dataset, model):
     dataset = lsr_benchmark.load(dataset)
