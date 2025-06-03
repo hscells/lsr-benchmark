@@ -24,6 +24,9 @@ class LsrBenchmarkDocument(NamedTuple):
         segments = [Segment(int(i["start"]), int(i["end"]), i["text"]) for i in json_doc["segments"]]
         return LsrBenchmarkDocument(json_doc["doc_id"], segments)
 
+    def default_text(self):
+        return self.segments[0].text
+
 
 class LsrBenchmarkSegmentedDocument(NamedTuple):
     doc_id: str
