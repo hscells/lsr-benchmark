@@ -15,6 +15,10 @@ def register_to_ir_datasets():
         if irds_id not in registry:
             registry.register(irds_id, build_dataset_from_local_cache(k, True))
 
+        irds_id = f"lsr-benchmark/{k}"
+        if irds_id not in registry:
+            registry.register(irds_id, build_dataset_from_local_cache(k, False))
+
 
 def load(ir_datasets_id: str):
     ensure_corpus_is_extracted(ir_datasets_id)
