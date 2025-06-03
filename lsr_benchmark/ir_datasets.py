@@ -62,7 +62,7 @@ class LsrBenchmarkDocuments(BaseDocs):
         return self.__docs
 
     def docs_count(self):
-        return len([1 for i in docs_iter()])
+        return len([1 for i in self.docs_iter()])
 
 
 class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
@@ -72,7 +72,7 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
                 yield LsrBenchmarkSegmentedDocument(f"{doc.doc_id}___{idx}___", segment)
 
     def docs_count(self):
-        return len([1 for i in docs_iter()])
+        return len([1 for i in self.docs_iter()])
 
 class LsrBenchmarkDataset(Dataset):
     def __init__(self, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
