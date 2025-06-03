@@ -13,6 +13,7 @@ from lightning_ir import (
     TorchSparseIndexConfig,
     TorchSparseIndexer,
 )
+from tirex_tracker import tracking
 
 import lsr_benchmark
 
@@ -39,7 +40,8 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
         inference_datasets=[QueryDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
     )
     trainer = LightningIRTrainer(logger=False)
-    output = trainer.predict(model=module, datamodule=datamodule)
+    with tracking(export_file_path=save_dir / "query-ir-metadata.yml"):
+        output = trainer.predict(model=module, datamodule=datamodule)
     query_embeddings = torch.cat([x.query_embeddings.embeddings for x in output], dim=0).squeeze(1)
     sparse_query_embeddings = torch.sparse_csr_tensor(
         *TorchSparseIndexer.to_sparse_csr(query_embeddings), query_embeddings.shape
@@ -54,7 +56,9 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     )
     index_callback = IndexCallback(index_dir=save_dir / "index", index_config=TorchSparseIndexConfig())
     trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
-    trainer.index(model=module, datamodule=datamodule)
+    with tracking(export_file_path=save_dir / "index-ir-metadata.yml"):
+        output = trainer.predict(model=module, datamodule=datamodule)
+        trainer.index(model=module, datamodule=datamodule)
 
 
 if __name__ == "__main__":
