@@ -1,27 +1,61 @@
 #!/usr/bin/env python3
-import lsr_benchmark
-import ir_datasets
+from pathlib import Path
+
 import click
+import torch
+from lightning_ir import (
+    BiEncoderModule,
+    DocDataset,
+    IndexCallback,
+    LightningIRDataModule,
+    LightningIRTrainer,
+    QueryDataset,
+    TorchSparseIndexConfig,
+    TorchSparseIndexer,
+)
+
+import lsr_benchmark
 
 
 @click.command()
-@click.option("--dataset", type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS), required=True, help="The dataset id or a local directory.")
+@click.option(
+    "--dataset",
+    type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS),
+    required=True,
+    help="The dataset id or a local directory.",
+)
 @click.option("--model", type=str, required=True, help="The lightning ir model.")
-def main(dataset, model):
+@click.option("--batch_size", type=int, default=4, help="Number of queries/documents to process in a batch.")
+@click.option("--save_dir", type=Path, default=Path.cwd(), help="Directory to save output embeddings.")
+def main(dataset: str, model: str, batch_size: int, save_dir: Path):
+    # register the dataset with ir_datasets
     lsr_benchmark.register_to_ir_datasets()
-    dataset = ir_datasets.load(f"lsr-benchmark/{dataset}/segmented")
 
-    # do something with the queries
-    for query in dataset.queries_iter():
-        print(query.query_id, "=>", query.default_text())
-        break
+    # load the model
+    module = BiEncoderModule(model_name_or_path=model)
 
-    # do something with the documents
-    for doc in dataset.docs_iter(embedding=None):
-        print(f"Docid={doc.doc_id} segment.offset_start={doc.segment.offset_start} segment.offset_end={doc.segment.offset_end} segment.text={doc.default_text()[:150]}...")
-        break
+    # embed queries
+    datamodule = LightningIRDataModule(
+        inference_datasets=[QueryDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
+    )
+    trainer = LightningIRTrainer(logger=False)
+    output = trainer.predict(model=module, datamodule=datamodule)
+    query_embeddings = torch.cat([x.query_embeddings.embeddings for x in output], dim=0).squeeze(1)
+    sparse_query_embeddings = torch.sparse_csr_tensor(
+        *TorchSparseIndexer.to_sparse_csr(query_embeddings), query_embeddings.shape
+    )
+    torch.save(sparse_query_embeddings, save_dir / "query_embeddings.pt")
+    del sparse_query_embeddings
+    del query_embeddings
+
+    # index documents
+    datamodule = LightningIRDataModule(
+        inference_datasets=[DocDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
+    )
+    index_callback = IndexCallback(index_dir=save_dir / "index", index_config=TorchSparseIndexConfig())
+    trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
+    trainer.index(model=module, datamodule=datamodule)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
