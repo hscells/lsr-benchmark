@@ -24,6 +24,15 @@ class LsrBenchmarkDocument(NamedTuple):
         segments = [Segment(int(i["start"]), int(i["end"]), i["text"]) for i in json_doc["segments"]]
         return LsrBenchmarkDocument(json_doc["doc_id"], segments)
 
+
+class LsrBenchmarkSegmentedDocument(NamedTuple):
+    doc_id: str
+    segment: Segment
+    
+    def default_text(self):
+        return self.segment.text
+
+
 class LsrBenchmarkQueries(BaseQueries):
     def __init__(self, queries):
        self.__queries = queries
@@ -55,16 +64,26 @@ class LsrBenchmarkDocuments(BaseDocs):
         docs = reader.all_lines(corpus_file)
         return LsrBenchmarkDocuments(docs)
 
+
+class LsrBenchmarkSegmentedDocuments(BaseDocs):
+    def docs_iter(self, embedding=None):
+        for doc in super().docs_iter(embedding):
+            for idx, segment in zip(range(len(doc.segments)), doc.segments):
+                yield LsrBenchmarkSegmentedDocument(f"{doc.doc_id}___{idx}___", segment)
+
+
 class LsrBenchmarkDataset(Dataset):
-    def __init__(self, docs=None, queries=None, qrels=None, documentation=None):
+    def __init__(self, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
         if queries:
             queries = LsrBenchmarkQueries._from_file(queries)
 
         if qrels:
             qrels = TrecQrels(qrels, {0: 'Not Relevant', 1: 'Relevant'})
 
-        if docs:
+        if docs and not segmented:
             docs = LsrBenchmarkDocuments._from_file(docs)
+        if docs and segmented:
+            docs = LsrBenchmarkSegmentedDocuments._from_file(docs)
 
         super().__init__(docs, queries, qrels, documentation)
 
@@ -90,12 +109,12 @@ def extract_zip(zip_file: Path, target_directory: Path):
         target_directory.mkdir(parents=True, exist_ok=True)
         zip_ref.extractall(target_directory)
 
-def build_dataset_from_local_cache(ir_datasets_id: str):
+def build_dataset_from_local_cache(ir_datasets_id: str, segmented: bool):
     docs = inputs_dir(ir_datasets_id) / "corpus.jsonl.gz"
     queries = inputs_dir(ir_datasets_id) / "queries.jsonl"
     qrels = truths_dir(ir_datasets_id) / "qrels.txt"
 
-    return LsrBenchmarkDataset(docs, queries, qrels)
+    return LsrBenchmarkDataset(docs, queries, qrels, segmented)
 
 
 def ensure_corpus_is_extracted(ir_datasets_id: str):
