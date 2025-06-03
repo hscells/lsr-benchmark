@@ -89,6 +89,11 @@ for doc in dataset.docs_iter(embedding='<EMBEDDING-MODEL>'):
 # process the document texts:
 for doc in dataset.docs_iter(embedding=None):
     doc # namedtuple<doc_id, segments.text>
+
+# process the document texts via segmented versions in ir_datasets
+lsr_benchmark.register_to_ir_datasets()
+for segmented_doc in ir_datasets.load(f"lsr-benchmark/{dataset}/segmented")
+    doc # namedtuple<doc_id, segment>
 ```
 
 ## Format of Document Texts

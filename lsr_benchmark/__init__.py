@@ -7,8 +7,10 @@ from lsr_benchmark.ir_datasets import ensure_corpus_is_extracted, build_dataset_
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs
 
 
+SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
+
 def register_to_ir_datasets():
-    for k in MAPPING_OF_DATASET_IDS.keys():
+    for k in SUPPORTED_IR_DATASETS:
         irds_id = f"lsr-benchmark/{k}/segmented"
         if irds_id not in registry:
             registry.register(irds_id, build_dataset_from_local_cache(k, True))

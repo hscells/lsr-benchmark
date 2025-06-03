@@ -28,7 +28,7 @@ class LsrBenchmarkDocument(NamedTuple):
 class LsrBenchmarkSegmentedDocument(NamedTuple):
     doc_id: str
     segment: Segment
-    
+
     def default_text(self):
         return self.segment.text
 
@@ -47,8 +47,10 @@ class LsrBenchmarkQueries(BaseQueries):
         return LsrBenchmarkQueries(queries)
 
 class LsrBenchmarkDocuments(BaseDocs):
-    def __init__(self, docs):
-       self.__docs = docs
+    def __init__(self, corpus_file):
+        reader = JsonlFormat()
+        reader.apply_configuration_and_throw_if_invalid({"required_fields": ["doc_id", "segments"], "max_size_mb": 2500})
+        self.__docs = reader.all_lines(corpus_file)
 
     def docs_iter(self, embedding=None):
         if embedding is not None:
@@ -57,15 +59,8 @@ class LsrBenchmarkDocuments(BaseDocs):
         for l in self.__docs:
             yield LsrBenchmarkDocument._from_json(l)
 
-    @staticmethod
-    def _from_file(corpus_file):
-        reader = JsonlFormat()
-        reader.apply_configuration_and_throw_if_invalid({"required_fields": ["doc_id", "segments"], "max_size_mb": 2500})
-        docs = reader.all_lines(corpus_file)
-        return LsrBenchmarkDocuments(docs)
 
-
-class LsrBenchmarkSegmentedDocuments(BaseDocs):
+class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
     def docs_iter(self, embedding=None):
         for doc in super().docs_iter(embedding):
             for idx, segment in zip(range(len(doc.segments)), doc.segments):
@@ -81,16 +76,16 @@ class LsrBenchmarkDataset(Dataset):
             qrels = TrecQrels(qrels, {0: 'Not Relevant', 1: 'Relevant'})
 
         if docs and not segmented:
-            docs = LsrBenchmarkDocuments._from_file(docs)
+            docs = LsrBenchmarkDocuments(docs)
         if docs and segmented:
-            docs = LsrBenchmarkSegmentedDocuments._from_file(docs)
+            docs = LsrBenchmarkSegmentedDocuments(docs)
 
         super().__init__(docs, queries, qrels, documentation)
 
 def base_dir(ir_datasets_id: str):
     if ir_datasets_id not in MAPPING_OF_DATASET_IDS:
         raise ValueError(f"The dataset ID '{ir_datasets_id}' is not supported. Supported are: {MAPPING_OF_DATASET_IDS.keys()}.")
-    return Path(MAPPING_OF_DATASET_IDS[ir_datasets_id]).resolve().absolute()
+    return (Path(__file__).parent.parent / MAPPING_OF_DATASET_IDS[ir_datasets_id]).resolve().absolute()
 
 def inputs_dir(ir_datasets_id: str):
     return base_dir(ir_datasets_id) / "inputs-extracted"
