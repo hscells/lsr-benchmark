@@ -40,13 +40,13 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
         inference_datasets=[QueryDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
     )
     trainer = LightningIRTrainer(logger=False)
-    with tracking(export_file_path=save_dir / "query-ir-metadata.yml"):
+    with tracking(export_file_path=save_dir / "queries" / "query-ir-metadata.yml"):
         output = trainer.predict(model=module, datamodule=datamodule)
     query_embeddings = torch.cat([x.query_embeddings.embeddings for x in output], dim=0).squeeze(1)
     sparse_query_embeddings = torch.sparse_csr_tensor(
         *TorchSparseIndexer.to_sparse_csr(query_embeddings), query_embeddings.shape
     )
-    torch.save(sparse_query_embeddings, save_dir / "query_embeddings.pt")
+    torch.save(sparse_query_embeddings, save_dir / "queries" / "query_embeddings.pt")
     del sparse_query_embeddings
     del query_embeddings
 
@@ -54,10 +54,9 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     datamodule = LightningIRDataModule(
         inference_datasets=[DocDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
     )
-    index_callback = IndexCallback(index_dir=save_dir / "index", index_config=TorchSparseIndexConfig())
+    index_callback = IndexCallback(index_dir=save_dir / "docs", index_config=TorchSparseIndexConfig())
     trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
-    with tracking(export_file_path=save_dir / "index-ir-metadata.yml"):
-        output = trainer.predict(model=module, datamodule=datamodule)
+    with tracking(export_file_path=save_dir / "docs" / "index-ir-metadata.yml"):
         trainer.index(model=module, datamodule=datamodule)
 
 
