@@ -28,17 +28,21 @@ import lsr_benchmark
 @click.option("--model", type=str, required=True, help="The lightning ir model.")
 @click.option("--batch_size", type=int, default=4, help="Number of queries/documents to process in a batch.")
 @click.option("--save_dir", type=Path, default=Path.cwd(), help="Directory to save output embeddings.")
-def main(dataset: str, model: str, batch_size: int, save_dir: Path):
+@click.option("--segmented", is_flag=True, help="Whether to use segmented embeddings.")
+def main(dataset: str, model: str, batch_size: int, save_dir: Path, segmented: bool):
     # register the dataset with ir_datasets
     lsr_benchmark.register_to_ir_datasets()
 
     # load the model
     module = BiEncoderModule(model_name_or_path=model)
 
+    # parse dataset id
+    dataset_id = f"lsr-benchmark/{dataset}"
+    if segmented:
+        dataset_id += "/segmented"
+
     # embed queries
-    datamodule = LightningIRDataModule(
-        inference_datasets=[QueryDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
-    )
+    datamodule = LightningIRDataModule(inference_datasets=[QueryDataset(dataset_id)], inference_batch_size=batch_size)
     trainer = LightningIRTrainer(logger=False)
     with tracking(export_file_path=save_dir / "queries" / "query-ir-metadata.yml"):
         output = trainer.predict(model=module, datamodule=datamodule)
@@ -51,9 +55,7 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     del query_embeddings
 
     # index documents
-    datamodule = LightningIRDataModule(
-        inference_datasets=[DocDataset(f"lsr-benchmark/{dataset}/segmented")], inference_batch_size=batch_size
-    )
+    datamodule = LightningIRDataModule(inference_datasets=[DocDataset(dataset_id)], inference_batch_size=batch_size)
     index_callback = IndexCallback(index_dir=save_dir / "docs", index_config=TorchSparseIndexConfig())
     trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
     with tracking(export_file_path=save_dir / "docs" / "index-ir-metadata.yml"):
