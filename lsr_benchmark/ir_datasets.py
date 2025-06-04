@@ -7,15 +7,14 @@ from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from tira.check_format import JsonlFormat, QueryProcessorFormat
 
-MAPPING_OF_DATASET_IDS = {
-    "clueweb09/en/trec-web-2009": "data/trec-18-web"
-}
+MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
 
 
 class Segment(NamedTuple):
     offset_start: int
     offset_end: int
     text: str
+
 
 class LsrBenchmarkDocument(NamedTuple):
     doc_id: str
@@ -40,7 +39,7 @@ class LsrBenchmarkSegmentedDocument(NamedTuple):
 
 class LsrBenchmarkQueries(BaseQueries):
     def __init__(self, queries_file):
-       self.__queries_file = queries_file
+        self.__queries_file = queries_file
 
     def queries_iter(self):
         for l in QueryProcessorFormat().all_lines(self.__queries_file):
@@ -50,6 +49,7 @@ class LsrBenchmarkQueries(BaseQueries):
 class LsrEmbedding(NamedTuple):
     doc_id: str
     embedding: torch.Tensor
+
 
 class LsrBenchmarkDocuments(BaseDocs):
     def __init__(self, corpus_file):
@@ -64,18 +64,25 @@ class LsrBenchmarkDocuments(BaseDocs):
             target_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented-extracted"
             extract_zip(zip_dir, target_dir)
             target_dir = target_dir / "docs" / "lsr-benchmark" / self.__irds_id
-        
+
         assert target_dir is not None
 
         embeddings = torch.load(target_dir / "index.pt")
+        doc_ids = (target_dir / "doc_ids.txt").read_text().strip().split("\n")
+        doc_id_to_embedding = {doc_id: embedding for doc_id, embedding in zip(doc_ids, embeddings)}
 
-        for l, e in zip(self.docs(), embeddings):
-            yield LsrEmbedding(LsrBenchmarkDocument._from_json(l).doc_id, e)
+        for l in self.docs():
+            doc = LsrBenchmarkDocument._from_json(l)
+            doc_id = doc.doc_id
+            e = doc_id_to_embedding[doc_id]
+            yield LsrEmbedding(doc_id, e)
 
     def docs(self):
         if not self.__docs:
             reader = JsonlFormat()
-            reader.apply_configuration_and_throw_if_invalid({"required_fields": ["doc_id", "segments"], "max_size_mb": 2500})
+            reader.apply_configuration_and_throw_if_invalid(
+                {"required_fields": ["doc_id", "segments"], "max_size_mb": 2500}
+            )
             self.__docs = reader.all_lines(self.__corpus_file)
         return self.__docs
 
@@ -92,6 +99,7 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
     def docs_count(self):
         return len([1 for i in self.docs_iter()])
 
+
 class LsrBenchmarkDataset(Dataset):
     def __init__(self, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
         if queries:
@@ -99,10 +107,12 @@ class LsrBenchmarkDataset(Dataset):
 
         if qrels:
             qrels_file = qrels
-            class QrelsObj():
+
+            class QrelsObj:
                 def stream(self):
                     return open(qrels_file, "rb")
-            qrels = TrecQrels(QrelsObj(), {0: 'Not Relevant', 1: 'Relevant'})
+
+            qrels = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
 
         if docs and not segmented:
             docs = LsrBenchmarkDocuments(docs)
@@ -111,16 +121,22 @@ class LsrBenchmarkDataset(Dataset):
 
         super().__init__(docs, queries, qrels, documentation)
 
+
 def base_dir(ir_datasets_id: str):
     if ir_datasets_id not in MAPPING_OF_DATASET_IDS:
-        raise ValueError(f"The dataset ID '{ir_datasets_id}' is not supported. Supported are: {MAPPING_OF_DATASET_IDS.keys()}.")
+        raise ValueError(
+            f"The dataset ID '{ir_datasets_id}' is not supported. Supported are: {MAPPING_OF_DATASET_IDS.keys()}."
+        )
     return (Path(__file__).parent.parent / MAPPING_OF_DATASET_IDS[ir_datasets_id]).resolve().absolute()
+
 
 def inputs_dir(ir_datasets_id: str):
     return base_dir(ir_datasets_id) / "inputs-extracted"
 
+
 def truths_dir(ir_datasets_id: str):
     return base_dir(ir_datasets_id) / "truths-extracted"
+
 
 def extract_zip(zip_file: Path, target_directory: Path):
     if target_directory.exists():
@@ -129,9 +145,10 @@ def extract_zip(zip_file: Path, target_directory: Path):
     if not zipfile.is_zipfile(zip_file):
         raise ValueError(f"I expected that {zip_file} is not a valid ZIP archive.")
 
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+    with zipfile.ZipFile(zip_file, "r") as zip_ref:
         target_directory.mkdir(parents=True, exist_ok=True)
         zip_ref.extractall(target_directory)
+
 
 def build_dataset_from_local_cache(ir_datasets_id: str, segmented: bool):
     docs = inputs_dir(ir_datasets_id) / "corpus.jsonl.gz"
@@ -144,6 +161,8 @@ def build_dataset_from_local_cache(ir_datasets_id: str, segmented: bool):
 def ensure_corpus_is_extracted(ir_datasets_id: str):
     d = base_dir(ir_datasets_id)
 
-    for src, extracted in [(d / "inputs.zip", inputs_dir(ir_datasets_id)), (d / "truths.zip", truths_dir(ir_datasets_id))]:
+    for src, extracted in [
+        (d / "inputs.zip", inputs_dir(ir_datasets_id)),
+        (d / "truths.zip", truths_dir(ir_datasets_id)),
+    ]:
         extract_zip(src, extracted)
-
