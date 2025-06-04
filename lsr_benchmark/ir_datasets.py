@@ -49,8 +49,16 @@ class LsrBenchmarkDocuments(BaseDocs):
     def __init__(self, corpus_file):
         self.__corpus_file = corpus_file
         self.__docs = None
+        self.__irds_id = "clueweb09/en/trec-web-2009"
 
-    def docs_iter(self, embedding=None):
+    def docs_iter(self, embedding=None, passage_aggregation=None):
+        if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
+            zip_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented.zip"
+            target_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented-extracted"
+            extract_zip(zip_dir, target_dir)
+            target_dir = target_dir / "docs" / "lsr-benchmark" / self.__irds_id
+            raise ValueError(f"fooo: {target_dir}")
+    
         if embedding is not None:
             raise ValueError("ToDo: implement this...")
 

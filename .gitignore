@@ -5,3 +5,5 @@ data/trec-18-web/inputs.zip
 data/trec-18-web/truths.zip
 inputs-extracted
 truths-extracted
+splade-v3-non-segmented-extracted
+splade-v3-non-segmented.zip
