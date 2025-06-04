@@ -56,7 +56,7 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path, segmented: b
 
     # index documents
     datamodule = LightningIRDataModule(inference_datasets=[DocDataset(dataset_id)], inference_batch_size=batch_size)
-    index_callback = IndexCallback(index_dir=save_dir / "docs", index_config=TorchSparseIndexConfig())
+    index_callback = IndexCallback(index_dir=save_dir / "docs", index_name="", index_config=TorchSparseIndexConfig())
     trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
     with tracking(export_file_path=save_dir / "docs" / "index-ir-metadata.yml"):
         trainer.index(model=module, datamodule=datamodule)
