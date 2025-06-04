@@ -1,9 +1,11 @@
-from pathlib import Path
 import zipfile
-from tira.check_format import QueryProcessorFormat, JsonlFormat
-from ir_datasets.formats import BaseDocs, TrecQrels, BaseQueries, GenericQuery
-from ir_datasets.datasets.base import Dataset
+from pathlib import Path
 from typing import List, NamedTuple
+
+import torch
+from ir_datasets.datasets.base import Dataset
+from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
+from tira.check_format import JsonlFormat, QueryProcessorFormat
 
 MAPPING_OF_DATASET_IDS = {
     "clueweb09/en/trec-web-2009": "data/trec-18-web"
@@ -45,6 +47,10 @@ class LsrBenchmarkQueries(BaseQueries):
             yield GenericQuery(l["qid"], l["query"])
 
 
+class LsrEmbedding(NamedTuple):
+    doc_id: str
+    embedding: torch.Tensor
+
 class LsrBenchmarkDocuments(BaseDocs):
     def __init__(self, corpus_file):
         self.__corpus_file = corpus_file
@@ -52,18 +58,19 @@ class LsrBenchmarkDocuments(BaseDocs):
         self.__irds_id = "clueweb09/en/trec-web-2009"
 
     def docs_iter(self, embedding=None, passage_aggregation=None):
+        target_dir = None
         if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
             zip_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented.zip"
             target_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented-extracted"
             extract_zip(zip_dir, target_dir)
             target_dir = target_dir / "docs" / "lsr-benchmark" / self.__irds_id
-            raise ValueError(f"fooo: {target_dir}")
-    
-        if embedding is not None:
-            raise ValueError("ToDo: implement this...")
+        
+        assert target_dir is not None
 
-        for l in self.docs():
-            yield LsrBenchmarkDocument._from_json(l)
+        embeddings = torch.load(target_dir / "index.pt")
+
+        for l, e in zip(self.docs(), embeddings):
+            yield LsrEmbedding(LsrBenchmarkDocument._from_json(l).doc_id, e)
 
     def docs(self):
         if not self.__docs:
