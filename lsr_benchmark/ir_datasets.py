@@ -29,6 +29,11 @@ class LsrBenchmarkDocument(NamedTuple):
         return "" if len(self.segments) == 0 else self.segments[0].text
 
 
+class LsrBenchmarkDocumentEmbedding(NamedTuple):
+    doc_id: str
+    embedding: torch.Tensor
+
+
 class LsrBenchmarkSegmentedDocument(NamedTuple):
     doc_id: str
     segment: Segment
@@ -40,14 +45,35 @@ class LsrBenchmarkSegmentedDocument(NamedTuple):
 class LsrBenchmarkQueries(BaseQueries):
     def __init__(self, queries_file):
         self.__queries_file = queries_file
+        self.__irds_id = "clueweb09/en/trec-web-2009"
 
-    def queries_iter(self):
+    def queries_iter(self, embedding=None, passage_aggregation=None):
+        if embedding is None:
+            for l in QueryProcessorFormat().all_lines(self.__queries_file):
+                yield GenericQuery(l["qid"], l["query"])
+            return
+
+        target_dir = None
+        if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
+            zip_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented.zip"
+            target_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented-extracted"
+            extract_zip(zip_dir, target_dir)
+            target_dir = target_dir / "queries"
+
+        assert target_dir is not None
+
+        embeddings = torch.load(target_dir / "query_embeddings.pt")
+        query_ids = (target_dir / "query_ids.txt").read_text().strip().split("\n")
+        query_id_to_embedding = {query_id: embedding for query_id, embedding in zip(query_ids, embeddings)}
+
         for l in QueryProcessorFormat().all_lines(self.__queries_file):
-            yield GenericQuery(l["qid"], l["query"])
+            query_id = l["qid"]
+            e = query_id_to_embedding[query_id]
+            yield LsrBenchmarkQueryEmbedding(query_id, e)
 
 
-class LsrEmbedding(NamedTuple):
-    doc_id: str
+class LsrBenchmarkQueryEmbedding(NamedTuple):
+    query_id: str
     embedding: torch.Tensor
 
 
@@ -58,6 +84,11 @@ class LsrBenchmarkDocuments(BaseDocs):
         self.__irds_id = "clueweb09/en/trec-web-2009"
 
     def docs_iter(self, embedding=None, passage_aggregation=None):
+        if embedding is None:
+            for l in self.docs():
+                yield LsrBenchmarkDocument._from_json(l)
+            return
+
         target_dir = None
         if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
             zip_dir = base_dir(self.__irds_id) / "splade-v3-non-segmented.zip"
@@ -75,7 +106,7 @@ class LsrBenchmarkDocuments(BaseDocs):
             doc = LsrBenchmarkDocument._from_json(l)
             doc_id = doc.doc_id
             e = doc_id_to_embedding[doc_id]
-            yield LsrEmbedding(doc_id, e)
+            yield LsrBenchmarkDocumentEmbedding(doc_id, e)
 
     def docs(self):
         if not self.__docs:

@@ -47,10 +47,12 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path, segmented: b
     with tracking(export_file_path=save_dir / "queries" / "query-ir-metadata.yml"):
         output = trainer.predict(model=module, datamodule=datamodule)
     query_embeddings = torch.cat([x.query_embeddings.embeddings for x in output], dim=0).squeeze(1)
+    query_ids = [query_id for x in output for query_id in x.query_embeddings.ids]
     sparse_query_embeddings = torch.sparse_csr_tensor(
         *TorchSparseIndexer.to_sparse_csr(query_embeddings), query_embeddings.shape
     )
     torch.save(sparse_query_embeddings, save_dir / "queries" / "query_embeddings.pt")
+    (save_dir / "queries" / "query_ids.txt").write_text("\n".join(query_ids))
     del sparse_query_embeddings
     del query_embeddings
 
