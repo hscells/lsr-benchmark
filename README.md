@@ -27,6 +27,8 @@ You can submit solutions to step 2 (i.e., models that embed documents and querie
 
 # Supported Corproa
 
+ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https://archive.tira.io/datasets?query=lsr-benchmark).
+
 | Subsample | IRDS | Partitioned | Embedding |
 |-----------|----------|----------|-----------|
 |corpus-subsamples/clueweb09/en/trec-web-2009| OK | | |
