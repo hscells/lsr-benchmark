@@ -13,7 +13,7 @@
 
 [CLI](#command-line-tool)&emsp;•&emsp;[Python API](#cc-api)&emsp;•&emsp;[Citation](#citation)
 
-The lsr-benchmark aims to support holisitc evaluations of the lexical sparse retrieval paradigm to contrast efficiency and effectiveness accross diverse retrieval scenarios.
+The lsr-benchmark aims to support holisitc evaluations of the learned sparse retrieval paradigm to contrast efficiency and effectiveness accross diverse retrieval scenarios.
 
 # Task
 
