@@ -7,6 +7,7 @@ from .segmentation import segmented_document
 import gzip
 import json
 import shutil
+from uuid import uuid4
 
 import zipfile
 import os
