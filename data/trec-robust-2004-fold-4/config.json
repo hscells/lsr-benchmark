@@ -1,5 +1,5 @@
 {
     "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec12/robust/",
-    "ir-datasets-id": "disks45/nocr/trec-robust-2004/fold1",
+    "ir-datasets-id": "disks45/nocr/trec-robust-2004/fold4",
     "subsample_depth": 150
 }
