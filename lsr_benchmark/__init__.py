@@ -3,7 +3,7 @@ import click
 import json
 from pathlib import Path
 from ir_datasets import registry
-from lsr_benchmark.ir_datasets import ensure_corpus_is_extracted, build_dataset_from_local_cache, MAPPING_OF_DATASET_IDS
+from lsr_benchmark.irds import ensure_corpus_is_extracted, build_dataset_from_local_cache, MAPPING_OF_DATASET_IDS
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs
 
 
