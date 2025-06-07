@@ -100,11 +100,15 @@ def segmented_document(documents, passage_size):
 
     for k, p in ret_passages.items():
         segments = []
-        for i in range(len(p) - 1):
-            start = p[i]
-            end = p[i+1]
+        if len(p) == 1:
+            segments.append({"start": p[0]["id"], "end": p[0]["id"], "text": p[0]["body"].strip()})
+        else:
+            for i in range(len(p) - 1):
+                start = p[i]
+                end = p[i+1]
 
-            segments.append({"start": start["id"], "end": end["id"], "text": (start["body"] + " " + end["body"]).strip()})
+                segments.append({"start": start["id"], "end": end["id"], "text": (start["body"] + " " + end["body"]).strip()})
+
         ret[k] = {"doc_id": k, "segments": segments}
 
     return ret
