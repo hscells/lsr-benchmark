@@ -109,6 +109,6 @@ def segmented_document(documents, passage_size):
 
                 segments.append({"start": start["id"], "end": end["id"], "text": (start["body"] + " " + end["body"]).strip()})
 
-        ret[k] = {"doc_id": k, "segments": segments}
+        ret[k] = {"doc_id": k, "segments": segments, "default_text": documents[k]}
 
     return ret
