@@ -1,0 +1,5 @@
+{
+    "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec33/rag/",
+    "ir-datasets-id": "msmarco-segment-v2.1/trec-rag-2024",
+    "subsample_depth": 200
+}
