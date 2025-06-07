@@ -1,5 +1,6 @@
 {
     "runs": "/mnt/ceph/storage/data-in-progress/data-research/web-search/web-search-trec/trec-system-runs/trec29/deep.passages/",
     "ir-datasets-id": "msmarco-passage/trec-dl-2020/judged",
-    "subsample_depth": 100
+    "subsample_depth": 100,
+    "passage_size": 5000
 }

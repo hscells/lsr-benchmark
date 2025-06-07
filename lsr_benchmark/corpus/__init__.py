@@ -3,6 +3,7 @@ import ir_datasets
 import tempfile
 from pathlib import Path
 from .corpus_subsampling import create_subsample
+from .segmentation import segmented_document
 import gzip
 import json
 import shutil
@@ -46,8 +47,7 @@ def materialize_corpus(directory, config):
         return
     subsample = create_subsample(config["runs"], ir_datasets_id, config["subsample_depth"], directory)
     docs = load_docs(ir_datasets_id, subsample)
-    docs = segmented_document(docs)
-    docs = segmented_document(docs)
+    docs = segmented_document(docs, config.get("passage_size", 80))
     doc_mapping = {}
     with gzip.open(directory/"corpus.jsonl.gz", 'wt') as f:
         for doc in docs.values():

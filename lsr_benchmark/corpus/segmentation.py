@@ -18,7 +18,7 @@ class AbstractPassageChunker(ABC):
         pass
 
     @staticmethod
-    def chunk_document(document_sentences, sentences_word_count, passage_size=80) -> List[Dict]:
+    def chunk_document(document_sentences, sentences_word_count, passage_size) -> List[Dict]:
         """
         Creates the passage chunks for a given document
         """
@@ -72,7 +72,7 @@ class AbstractPassageChunker(ABC):
         return passages
 
 class SpacyPassageChunker(AbstractPassageChunker):
-    def process_batch(self, document_batch) -> None:
+    def process_batch(self, document_batch, passage_size) -> None:
         doc_ids = list(document_batch.keys())
         ret = {}
 
@@ -86,15 +86,16 @@ class SpacyPassageChunker(AbstractPassageChunker):
                 for sentence in document_sentences
             ]
 
-            generated_passages = self.chunk_document(document_sentences, sentences_word_count)
+            generated_passages = self.chunk_document(document_sentences, sentences_word_count, passage_size)
             ret[doc_ids[index]] = generated_passages
 
         return ret
 
 # code from https://github.com/grill-lab/trec-cast-tools
-def segmented_document(documents):
+def segmented_document(documents, passage_size):
+    print(f"Segment into passages of size {passage_size}.")
     chunker = SpacyPassageChunker()
-    ret_passages = chunker.process_batch(documents)
+    ret_passages = chunker.process_batch(documents, passage_size)
     ret = {}
 
     for k, p in ret_passages.items():
