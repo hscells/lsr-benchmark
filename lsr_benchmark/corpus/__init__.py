@@ -81,7 +81,7 @@ def materialize_queries(directory, config):
     output_xml = directory / "queries.xml"
 
     allowed_queries = set()
-    for _, i in ir_datasets.load(ir_datasets_id).qrels_iter():
+    for i in ir_datasets.load(ir_datasets_id).qrels_iter():
         allowed_queries.add(i.query_id)
 
     if not output_jsonl.exists():
