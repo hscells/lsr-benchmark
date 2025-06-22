@@ -80,16 +80,20 @@ def materialize_queries(directory, config):
     output_jsonl = directory / "queries.jsonl"
     output_xml = directory / "queries.xml"
 
+    allowed_queries = set()
+    for _, i in ir_datasets.load(ir_datasets_id).qrels_iter():
+        allowed_queries.add(i.query_id)
+
     if not output_jsonl.exists():
         dataset = ir_datasets.load(ir_datasets_id)
-        queries_mapped_jsonl = [irds_loader.map_query_as_jsonl(query, True) for query in dataset.queries_iter()]
+        queries_mapped_jsonl = [irds_loader.map_query_as_jsonl(query, True) for query in dataset.queries_iter() if query.query_id in allowed_queries]
         with open(output_jsonl, 'w') as f:
             for l in queries_mapped_jsonl:
                 f.write(l + '\n')
 
     if not output_xml.exists():
         dataset = ir_datasets.load(ir_datasets_id)
-        queries_mapped_xml = [irds_loader.map_query_as_xml(query, True) for query in dataset.queries_iter()]
+        queries_mapped_xml = [irds_loader.map_query_as_xml(query, True) for query in dataset.queries_iter() if query.query_id in allowed_queries]
         with open(output_xml, 'w') as f:
             for l in queries_mapped_xml:
                 f.write(str(l) + '\n')
