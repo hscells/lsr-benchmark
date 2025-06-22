@@ -35,15 +35,16 @@ def foo():
 
 def create_subsampled_corpus(directory, config):
     subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
+    target_directory = directory / "subsampled-corpus"
 
-    (directory/ "subsampled-corpus").mkdir(exist_ok=True)
-    with gzip.open(directory/ "subsampled-corpus" / "document-mapping.json.gz", "wt") as f:
+    target_directory.mkdir(exist_ok=True)
+    with gzip.open(target_directory / "document-mapping.json.gz", "wt") as f:
         f.write(json.dumps({i:i for i in subsample}))
 
-    materialize_raw_corpus(directory / "subsampled-corpus", subsample, config)
-    materialize_inputs(directory / "subsampled-corpus", config)
-    materialize_raw_truths(directory / "subsampled-corpus", config)
-    (directory / "subsampled-corpus" / "document-mapping.json.gz").unlink()
+    materialize_raw_corpus(target_directory, subsample, config)
+    materialize_inputs(target_directory, config)
+    materialize_truths(target_directory, config)
+    (target_directory / "document-mapping.json.gz").unlink()
 
 
 @main.command()

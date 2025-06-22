@@ -8,6 +8,7 @@ import gzip
 import json
 import shutil
 from uuid import uuid4
+from tira.ir_datasets_loader import IrDatasetsLoader
 
 import zipfile
 import os
@@ -25,10 +26,11 @@ def zip_directory(folder_path, output_path):
 def load_docs(ir_datasets_id, subsample):
     ret = {}
     docs_store = ir_datasets.load(ir_datasets_id).docs_store()
+    irds_loader = IrDatasetsLoader()
     skipped = 0
     for doc in tqdm(subsample):
         try:
-            ret[doc] = docs_store.get(doc).default_text()[:1900000]
+            ret[doc] = json.loads(irds_loader.map_doc(docs_store.get(doc)))
         except:
             skipped += 1
     print(f"Skipped {skipped} docs")
