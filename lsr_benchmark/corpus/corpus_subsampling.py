@@ -75,11 +75,24 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
             set[str]: The top-k pool of the runs as sampled corpus
         """
         ret = super().sample_corpus(ir_datasets_id, runs)
-        pool = TrecPoolMaker().make_pool(runs, strategy="topX", topX=self.depth).pool
+        qrels_iter = ir_datasets.load(ir_datasets_id).qrels_iter()
+        allowed_query_ids = set()
 
-        for docids in pool.values():
+        for qrel in qrels_iter:
+            allowed_query_ids.add(str(qrel.query_id))
+
+        pool = TrecPoolMaker().make_pool(runs, strategy="topX", topX=self.depth).pool
+        skipped = 0
+        for qid in pool.keys():
+            docids = pool[qid]
+            if str(qid) not in allowed_query_ids:
+                skipped += 1
+                continue
+
             for doc_id in docids:
                 ret.add(doc_id)
+
+        print(f"Skipped {skipped} queries without relevance judgments")
 
         return ret
 

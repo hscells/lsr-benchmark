@@ -42,6 +42,13 @@ def irds_id_from_config(config):
         ir_datasets_id = "corpus-subsamples/" + ir_datasets_id
     return ir_datasets_id
 
+def materialize_raw_corpus(directory, subsample, config):
+    ir_datasets_id = irds_id_from_config(config)
+    docs = load_docs(ir_datasets_id, subsample)
+    with gzip.open(directory / "corpus.jsonl.gz", 'wt') as f:
+        for doc in docs.values():
+            f.write(json.dumps(doc) + '\n')
+
 def materialize_corpus(directory, config):
     ir_datasets_id = irds_id_from_config(config)
     if (directory/"document-mapping.json.gz").is_file():
