@@ -19,10 +19,10 @@ The lsr-benchmark aims to support holisitc evaluations of the learned sparse ret
 
 # Task
 
-The lexical sparse retrieval paradigm conducts retrieval in three steps:
+The learned sparse retrieval paradigm conducts retrieval in three steps:
 
 1. Documents are segmented into passages so that the passages can be processed by pre-trained transformers.
-2. Documents and queries are embedded into a sparse lexical embedding.
+2. Documents and queries are embedded into a sparse learned embedding.
 3. Retrieval systems create an index of the document embeddings to return a ranking for each embedded query.
 
 You can submit solutions to step 2 (i.e., models that embed documents and queries into sparse embeddings) and/or solutions to step 3 (i.e., retrieval systems). The idea is then to validate all combinations of embeddings with all retrieval systems to identify which solutions work well for which use case, taking different notions of efficiency/effectiveness trade-offs into consideration. The passage segmentation for step 1 is open source (i.e., created via `lsr-benchmark segment-corpus <IR-DATASETS-ID>`) but fixed for this task.
