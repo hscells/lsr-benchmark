@@ -4,7 +4,7 @@ import json
 import gzip
 from pathlib import Path
 from ir_datasets import registry
-from lsr_benchmark.irds import ensure_corpus_is_extracted, build_dataset_from_local_cache, MAPPING_OF_DATASET_IDS
+from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadConfig
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
 
 
@@ -14,16 +14,15 @@ def register_to_ir_datasets():
     for k in SUPPORTED_IR_DATASETS:
         irds_id = f"lsr-benchmark/{k}/segmented"
         if irds_id not in registry:
-            registry.register(irds_id, build_dataset_from_local_cache(k, True))
+            registry.register(irds_id, build_dataset(k, True))
 
         irds_id = f"lsr-benchmark/{k}"
         if irds_id not in registry:
-            registry.register(irds_id, build_dataset_from_local_cache(k, False))
+            registry.register(irds_id, build_dataset(k, False))
 
 
 def load(ir_datasets_id: str):
-    ensure_corpus_is_extracted(ir_datasets_id)
-    return build_dataset_from_local_cache(ir_datasets_id, False)
+    return build_dataset(ir_datasets_id, False)
 
 @click.group()
 def main():
