@@ -64,26 +64,18 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 | ... ||||
 
 
-# Setup for Local Tests
+# Installation
 
-To install the lsr-benchmark for development purposes, please run:
+To install the lsr-benchmark for development purposes, please clone the repository and then run:
 
 ```
 pip3 install -e .
 ```
 
-If you want to install from the main branch, use:
+If you want to install from the main branch, please use:
 
 ```
 pip3 install git+https://github.com/reneuir/lsr-benchmark.git
-```
-
-This is only a temporary setup, later we will make this automated.
-
-```
-wget 'https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/inputs.zip' -O data/trec-18-web/inputs.zip
-wget 'https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/truths.zip' -O data/trec-18-web/truths.zip
-wget 'https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/splade-v3-non-segmented.zip' -O data/trec-18-web/splade-v3-non-segmented.zip
 ```
 
 # Data
