@@ -66,6 +66,18 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 
 # Setup for Local Tests
 
+To install the lsr-benchmark for development purposes, please run:
+
+```
+pip3 install -e .
+```
+
+If you want to install from the main branch, use:
+
+```
+pip3 install git+https://github.com/reneuir/lsr-benchmark.git
+```
+
 This is only a temporary setup, later we will make this automated.
 
 ```
