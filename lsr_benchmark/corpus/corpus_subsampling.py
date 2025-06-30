@@ -7,21 +7,20 @@ from tqdm import tqdm
 from glob import glob
 
 import ir_datasets
-from trectools import TrecPoolMaker, TrecRun
 
 
 class CorpusSampler(ABC):
     """Sample a set of documents from a large corpus."""
 
     @abstractmethod
-    def sample_corpus(ir_datasets_id: str, runs: list[TrecRun]) -> set[str]:
+    def sample_corpus(ir_datasets_id: str, runs: list) -> set[str]:
         """Sample a corpus (returned as a set of document IDs)
         for a given dataset and a set of runs that were used
         to cunstruct the pool.
 
         Args:
             ir_datasets_id (str): The ir_datasets ID of the dataset.
-            runs (list[TrecRun]): The runs used to construct the pool.
+            runs (list): The runs used to construct the pool.
 
         Returns:
             set[str]: The sampled corpus as a set of document IDs.
@@ -30,13 +29,13 @@ class CorpusSampler(ABC):
 
 
 class JudgmentPoolCorpusSampler(CorpusSampler):
-    def sample_corpus(self, ir_datasets_id: str, runs: list[TrecRun]) -> set[str]:
+    def sample_corpus(self, ir_datasets_id: str, runs: list) -> set[str]:
         """Sample a corpus (returned as a set of document IDs)
         by just returning all judged documents from the judgment pool.
 
         Args:
             ir_datasets_id (str): The ir_datasets ID of the dataset.
-            runs (list[TrecRun]): The runs used to construct the pool.
+            runs (list): The runs used to construct the pool.
 
         Returns:
             set[str]: The judged documents as sampled corpus.
@@ -62,18 +61,19 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
         """
         self.depth = depth
 
-    def sample_corpus(self, ir_datasets_id: str, runs: list[TrecRun]) -> set[str]:
+    def sample_corpus(self, ir_datasets_id: str, runs: list) -> set[str]:
         """Sample a corpus (returned as a set of document IDs)
         by returning the top-k pool of all runs that formed
         the original judgment pool.
 
         Args:
             ir_datasets_id (str): The ir_datasets ID of the dataset.
-            runs (list[TrecRun]): The runs used to construct the pool.
+            runs (list): The runs used to construct the pool.
 
         Returns:
             set[str]: The top-k pool of the runs as sampled corpus
         """
+        from trectools import TrecPoolMaker
         ret = super().sample_corpus(ir_datasets_id, runs)
         qrels_iter = ir_datasets.load(ir_datasets_id).qrels_iter()
         allowed_query_ids = set()
@@ -100,6 +100,7 @@ class RunPoolCorpusSampler(JudgmentPoolCorpusSampler):
         return f"top-{self.depth}-run-pool"
 
 def create_subsample(run_dir, ir_datasets_id, depth, output_dir):
+    from trectools import TrecRun
     if not (output_dir/"subsample.json").is_file():
         runs = []
         for i in tqdm(glob(f"{run_dir}/*"), "Load Runs"):
