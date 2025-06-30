@@ -1,15 +1,9 @@
 from operator import ge
-import spacy
+
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 
 from typing import Dict, List
-
-nlp = spacy.load("en_core_web_sm", exclude=[
-                 "parser", "tagger", "ner", "attribute_ruler", "lemmatizer", "tok2vec"])
-nlp.enable_pipe("senter")
-#python -m spacy download en_core_web_sm
-nlp.max_length = 2000000  # for documents that are longer than the spacy character limit
 
 
 class AbstractPassageChunker(ABC):
@@ -73,6 +67,12 @@ class AbstractPassageChunker(ABC):
 
 class SpacyPassageChunker(AbstractPassageChunker):
     def process_batch(self, document_batch, passage_size) -> None:
+        import spacy
+        nlp = spacy.load("en_core_web_sm", exclude=[
+                         "parser", "tagger", "ner", "attribute_ruler", "lemmatizer", "tok2vec"])
+        nlp.enable_pipe("senter")
+        #python -m spacy download en_core_web_sm
+        nlp.max_length = 2000000  # for documents that are longer than the spacy character limit
         doc_ids = list(document_batch.keys())
         ret = {}
 
