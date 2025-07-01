@@ -47,7 +47,7 @@ def main(dataset, embedding, passage_aggregation, output, heap_factor, query_cut
     rmtree(output / ".tirex-tracker")
     results = []
 
-    with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA):
+    with tracking(export_file_path=output / "retrieval-metadata.yml", export_format=ExportFormat.IR_METADATA):
         for query in dataset.queries_iter(embedding=embedding, passage_aggregation=passage_aggregation):
             query_components = np.asarray(query.embedding.indices().numpy(), dtype=string_type)
             query_values = query.embedding.values().numpy()
