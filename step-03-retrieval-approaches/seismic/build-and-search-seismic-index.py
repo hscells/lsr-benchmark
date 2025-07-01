@@ -6,7 +6,7 @@ import click
 import seismic
 from seismic import SeismicIndex, SeismicDataset
 from tqdm import tqdm
-from tirex_tracker import tracking
+from tirex_tracker import tracking, ExportFormat
 from shutil import rmtree
 from pathlib import Path
 import gzip
@@ -41,13 +41,13 @@ def main(dataset, embedding, passage_aggregation, output, heap_factor, query_cut
         seismic_dataset.add_document(doc.doc_id, keys, values)
 
     print("Documents added to the SeismicDataset. Now indexing..")
-    with tracking(export_file_path=output / "index-metadata.yml"):
+    with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA):
         index = SeismicIndex.build_from_dataset(seismic_dataset)
 
     rmtree(output / ".tirex-tracker")
     results = []
 
-    with tracking(export_file_path=output / "index-metadata.yml"):
+    with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA):
         for query in dataset.queries_iter(embedding=embedding, passage_aggregation=passage_aggregation):
             query_components = np.asarray(query.embedding.indices().numpy(), dtype=string_type)
             query_values = query.embedding.values().numpy()
@@ -60,7 +60,7 @@ def main(dataset, embedding, passage_aggregation, output, heap_factor, query_cut
         for ranking_for_query in results:
             rank = 1
             for qid, score, docno in ranking_for_query:
-                f.write(f"{qid} Q0 {docno} {rank} {score} seismic")
+                f.write(f"{qid} Q0 {docno} {rank} {score} seismic\n")
                 rank += 1
 
 
