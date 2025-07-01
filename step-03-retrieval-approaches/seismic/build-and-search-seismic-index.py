@@ -1,22 +1,31 @@
-
+#!/usr/bin/env python3
 import ir_datasets
 import lsr_benchmark
 import numpy as np
-
+import click
 import seismic
 from seismic import SeismicIndex, SeismicDataset
 from tqdm import tqdm
 
-lsr_benchmark.register_to_ir_datasets()
 
 
-def main():
-    dataset = ir_datasets.load(f"lsr-benchmark/clueweb09/en/trec-web-2009")
+@click.command()
+@click.option(
+    "--dataset",
+    type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS),
+    required=True,
+    help="The dataset id or a local directory.",
+)
+@click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
+@click.option("--passage_aggregation", required=False, default="--passage_aggregation", type=click.Choice(["first-passage"]), help="The passage aggregation to use.")
+def main(dataset, embedding, passage_aggregation):
+    lsr_benchmark.register_to_ir_datasets()
+    dataset = ir_datasets.load(dataset)
     seismic_dataset = SeismicDataset()
     string_type  = seismic.get_seismic_string()
 
 
-    for doc in tqdm(dataset.docs_iter(embedding="naver/splade-v3", passage_aggregation="first-passage")):
+    for doc in tqdm(dataset.docs_iter(embedding=embedding, passage_aggregation=passage_aggregation)):
 
         # The input types should be "string", array of f32, array of string_type    
         values = doc.embedding.values().numpy()
@@ -29,7 +38,7 @@ def main():
     
     results = []
 
-    for query in dataset.queries_iter(embedding="naver/splade-v3", passage_aggregation="first-passage"):
+    for query in dataset.queries_iter(embedding=embedding, passage_aggregation=passage_aggregation):
         query_components = np.asarray(query.embedding.indices().numpy(), dtype=string_type)
         query_values = query.embedding.values().numpy()
 

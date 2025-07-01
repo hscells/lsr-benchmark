@@ -1,0 +1,6 @@
+git+https://github.com/reneuir/lsr-benchmark.git
+tirex-tracker
+pyseismic-lsr
+click
+torch
+maturin
