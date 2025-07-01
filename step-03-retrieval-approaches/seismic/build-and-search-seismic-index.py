@@ -22,8 +22,11 @@ import gzip
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
 )
 @click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
-@click.option("--passage_aggregation", required=False, default="--passage_aggregation", type=click.Choice(["first-passage"]), help="The passage aggregation to use.")
-def main(dataset, embedding, passage_aggregation, output):
+@click.option("--heap-factor", type=float, required=False, default=0.8, help="TBD.")
+@click.option("--query-cut", type=int, required=False, default=10, help="TBD.")
+@click.option("--k", type=int, required=False, default=10, help="TBD.")
+@click.option("--passage-aggregation", required=False, default="--passage_aggregation", type=click.Choice(["first-passage"]), help="The passage aggregation to use.")
+def main(dataset, embedding, passage_aggregation, output, heap_factor, query_cut, k):
     output.mkdir(parents=True)
     lsr_benchmark.register_to_ir_datasets()
     dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
@@ -49,7 +52,7 @@ def main(dataset, embedding, passage_aggregation, output):
             query_components = np.asarray(query.embedding.indices().numpy(), dtype=string_type)
             query_values = query.embedding.values().numpy()
 
-            current_res = index.search(query_id=str(query.query_id), query_components=query_components, query_values=query_values, k=10, query_cut=10, heap_factor=0.8)
+            current_res = index.search(query_id=str(query.query_id), query_components=query_components, query_values=query_values, k=k, query_cut=query_cut, heap_factor=heap_factor)
             results.append(current_res)
 
     rmtree(output / ".tirex-tracker")
