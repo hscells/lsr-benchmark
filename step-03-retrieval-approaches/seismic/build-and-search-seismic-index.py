@@ -7,7 +7,9 @@ import seismic
 from seismic import SeismicIndex, SeismicDataset
 from tqdm import tqdm
 from tirex_tracker import tracking
+from shutil import rmtree
 from pathlib import Path
+import gzip
 
 
 @click.command()
@@ -39,6 +41,7 @@ def main(dataset, embedding, passage_aggregation, output):
     with tracking(export_file_path=output / "index-metadata.yml"):
         index = SeismicIndex.build_from_dataset(seismic_dataset)
 
+    rmtree(output / ".tirex-tracker")
     results = []
 
     with tracking(export_file_path=output / "index-metadata.yml"):
@@ -49,8 +52,13 @@ def main(dataset, embedding, passage_aggregation, output):
             current_res = index.search(query_id=str(query.query_id), query_components=query_components, query_values=query_values, k=10, query_cut=10, heap_factor=0.8)
             results.append(current_res)
 
-    print("Search completed.")
-    print("Results for the first query: ", results[0])
+    rmtree(output / ".tirex-tracker")
+    with gzip.open(output/"run.txt.gz", "wt") as f:
+        for ranking_for_query in results:
+            rank = 1
+            for qid, score, docno in ranking_for_query:
+                f.write(f"{qid} Q0 {docno} {rank} {score} seismic")
+                rank += 1
 
 
 if __name__ == "__main__":
