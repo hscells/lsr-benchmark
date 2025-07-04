@@ -2,20 +2,19 @@
 from pathlib import Path
 
 import click
+import numpy as np
 import torch
-from lightning_ir import (
-    BiEncoderModule,
-    DocDataset,
-    IndexCallback,
-    LightningIRDataModule,
-    LightningIRTrainer,
-    QueryDataset,
-    TorchSparseIndexConfig,
-    TorchSparseIndexer,
-)
+from lightning_ir import BiEncoderModule, DocDataset, LightningIRDataModule, LightningIRTrainer, QueryDataset
 from tirex_tracker import tracking
 
 import lsr_benchmark
+
+
+def convert_embeddings(embeddings: torch.Tensor):
+    token_idcs, column_idcs = torch.nonzero(embeddings, as_tuple=True)
+    row_indices = (token_idcs + 1).bincount().cumsum(0)
+    values = embeddings[token_idcs, column_idcs]
+    return values.numpy(), column_idcs.numpy(), row_indices.numpy()
 
 
 @click.command()
@@ -41,27 +40,33 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path, segmented: b
     if segmented:
         dataset_id += "/segmented"
 
-    # embed queries
-    datamodule = LightningIRDataModule(inference_datasets=[QueryDataset(dataset_id)], inference_batch_size=batch_size)
     trainer = LightningIRTrainer(logger=False)
-    with tracking(export_file_path=save_dir / "queries" / "query-ir-metadata.yml"):
-        output = trainer.predict(model=module, datamodule=datamodule)
-    query_embeddings = torch.cat([x.query_embeddings.embeddings for x in output], dim=0).squeeze(1)
-    query_ids = [query_id for x in output for query_id in x.query_embeddings.ids]
-    sparse_query_embeddings = torch.sparse_csr_tensor(
-        *TorchSparseIndexer.to_sparse_csr(query_embeddings), query_embeddings.shape
-    )
-    torch.save(sparse_query_embeddings, save_dir / "queries" / "query_embeddings.pt")
-    (save_dir / "queries" / "query_ids.txt").write_text("\n".join(query_ids))
-    del sparse_query_embeddings
-    del query_embeddings
 
-    # index documents
-    datamodule = LightningIRDataModule(inference_datasets=[DocDataset(dataset_id)], inference_batch_size=batch_size)
-    index_callback = IndexCallback(index_dir=save_dir / "docs", index_name="", index_config=TorchSparseIndexConfig())
-    trainer = LightningIRTrainer(logger=False, callbacks=[index_callback])
-    with tracking(export_file_path=save_dir / "docs" / "index-ir-metadata.yml"):
-        trainer.index(model=module, datamodule=datamodule)
+    # embed queries and documents
+    for text_type, Dataset in zip(["query", "doc"], [QueryDataset, DocDataset]):
+        datamodule = LightningIRDataModule(inference_datasets=[Dataset(dataset_id)], inference_batch_size=batch_size)
+        # downloads dataset if not already downloaded
+        datamodule.prepare_data()
+        text_type_save_dir = save_dir / text_type
+
+        with tracking(export_file_path=text_type_save_dir / f"{text_type}-ir-metadata.yml"):
+            output = trainer.predict(model=module, datamodule=datamodule)
+
+        embeddings = []
+        ids = []
+        for x in output:
+            embeddings.append(getattr(x, f"{text_type}_embeddings").embeddings)
+            ids.extend(getattr(x, f"{text_type}_embeddings").ids)
+
+        data, indices, indptr = convert_embeddings(torch.cat(embeddings, dim=0).squeeze(1))
+
+        np.savez_compressed(
+            text_type_save_dir / f"{text_type}-embeddings.npz",
+            data=data,
+            indices=indices,
+            indptr=indptr,
+        )
+        (text_type_save_dir / f"{text_type}-ids.txt").write_text("\n".join(ids))
 
 
 if __name__ == "__main__":

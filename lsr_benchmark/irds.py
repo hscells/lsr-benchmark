@@ -1,11 +1,12 @@
 import zipfile
 from pathlib import Path
 from typing import List, NamedTuple
-from ir_datasets.util import ZipExtractCache, ZipExtract, GzipExtract, home_path, Cache, _DownloadConfig
 
+import numpy as np
 import torch
 from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
+from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
 from tira.check_format import JsonlFormat, QueryProcessorFormat
 
 MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
@@ -27,21 +28,22 @@ DOWNLOAD_CONTENTS = {
         },
         "splade-v3-non-segmented": {
             "url": "https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/splade-v3-non-segmented.zip",
-            "expected_md5": "f9131d00b4305744ac4ee0cae40bfeeb",
+            "expected_md5": "fb05608785506a8047ba4a1e1fdee9f4",
             "size_hint": 127198049,
             "cache_path": "trec-web-2009-splade-v3-non-segmented.zip",
-        }
-        
+        },
     }
 }
 
 DownloadConfig = _DownloadConfig(contents=DOWNLOAD_CONTENTS)
+
 
 def extracted_resource(irds_id, f):
     zip_file = DownloadConfig.context(irds_id, home_path() / "lsr-benchmark" / irds_id.replace("/", "-"))[f].path()
     target_dir = Path(str(zip_file).replace(".zip", "") + "-extracted")
     extract_zip(zip_file, target_dir)
     return target_dir
+
 
 class Segment(NamedTuple):
     offset_start: int
@@ -80,27 +82,10 @@ class LsrBenchmarkQueries(BaseQueries):
         self.__queries_name = queries_file
         self.__irds_id = "clueweb09/en/trec-web-2009"
 
-    def queries_iter(self, embedding=None, passage_aggregation=None):
+    def queries_iter(self):
         queries_file = extracted_resource(self.__irds_id, "truths") / self.__queries_name
-        if embedding is None:
-            for l in QueryProcessorFormat().all_lines(queries_file):
-                yield GenericQuery(l["qid"], l["query"])
-            return
-
-        target_dir = None
-        if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
-            target_dir = extracted_resource(self.__irds_id, "splade-v3-non-segmented") / "queries"
-
-        assert target_dir is not None
-
-        embeddings = torch.load(target_dir / "query_embeddings.pt")
-        query_ids = (target_dir / "query_ids.txt").read_text().strip().split("\n")
-        query_id_to_embedding = {query_id: embedding for query_id, embedding in zip(query_ids, embeddings)}
-
         for l in QueryProcessorFormat().all_lines(queries_file):
-            query_id = l["qid"]
-            e = query_id_to_embedding[query_id]
-            yield LsrBenchmarkQueryEmbedding(query_id, e)
+            yield GenericQuery(l["qid"], l["query"])
 
 
 class LsrBenchmarkQueryEmbedding(NamedTuple):
@@ -115,26 +100,8 @@ class LsrBenchmarkDocuments(BaseDocs):
         self.__irds_id = "clueweb09/en/trec-web-2009"
 
     def docs_iter(self, embedding=None, passage_aggregation=None):
-        if embedding is None:
-            for l in self.docs():
-                yield LsrBenchmarkDocument._from_json(l)
-            return
-
-        target_dir = None
-        if embedding == "naver/splade-v3" and passage_aggregation == "first-passage":
-            target_dir = extracted_resource(self.__irds_id, "splade-v3-non-segmented") / "docs" / "lsr-benchmark" / self.__irds_id
-
-        assert target_dir is not None
-
-        embeddings = torch.load(target_dir / "index.pt")
-        doc_ids = (target_dir / "doc_ids.txt").read_text().strip().split("\n")
-        doc_id_to_embedding = {doc_id: embedding for doc_id, embedding in zip(doc_ids, embeddings)}
-
         for l in self.docs():
-            doc = LsrBenchmarkDocument._from_json(l)
-            doc_id = doc.doc_id
-            e = doc_id_to_embedding[doc_id]
-            yield LsrBenchmarkDocumentEmbedding(doc_id, e)
+            yield LsrBenchmarkDocument._from_json(l)
 
     def docs(self):
         if not self.__docs:
@@ -161,7 +128,7 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
 
 
 class LsrBenchmarkDataset(Dataset):
-    def __init__(self, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
+    def __init__(self, ir_datasets_id, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
         if queries:
             queries = LsrBenchmarkQueries(queries)
 
@@ -179,7 +146,35 @@ class LsrBenchmarkDataset(Dataset):
         if docs and segmented:
             docs = LsrBenchmarkSegmentedDocuments(docs)
 
+        self.__irds_id = ir_datasets_id
         super().__init__(docs, queries, qrels, documentation)
+        self.metadata = MetadataComponent(ir_datasets_id, self)
+
+    def embeddings(
+        self, model_name: str, passage_aggregation: str, text_type: str
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        embedding_dir = extracted_resource(self.__irds_id, model_name) / text_type
+        embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
+        ids = (embedding_dir / f"{text_type}-ids.txt").read_text().strip().split("\n")
+        return embeddings["data"], embeddings["indices"], embeddings["indptr"], ids
+
+    def query_embeddings(
+        self, model_name: str, passage_aggregation: str
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        ### hardcoded for now
+        model_name = "splade-v3-non-segmented"
+        ###
+
+        return self.embeddings(model_name, passage_aggregation, "query")
+
+    def doc_embeddings(
+        self, model_name: str, passage_aggregation: str
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        ### hardcoded for now
+        model_name = "splade-v3-non-segmented"
+        ###
+
+        return self.embeddings(model_name, passage_aggregation, "doc")
 
 
 def extract_zip(zip_file: Path, target_directory: Path):
@@ -197,7 +192,12 @@ def extract_zip(zip_file: Path, target_directory: Path):
 def build_dataset(ir_datasets_id: str, segmented: bool):
     docs = "corpus.jsonl.gz"
     queries = "queries.jsonl"
-    qrels = "qrels.txt"
+    # qrels = "qrels.txt" # Remove qrels for now, as they are not downloaded by default yet
 
-    return LsrBenchmarkDataset(docs, queries, qrels, segmented)
-
+    return LsrBenchmarkDataset(
+        ir_datasets_id=ir_datasets_id,
+        docs=docs,
+        queries=queries,
+        # qrels=qrels,
+        segmented=segmented,
+    )
