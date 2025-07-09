@@ -1,6 +1,6 @@
 import zipfile
 from pathlib import Path
-from typing import List, NamedTuple
+from typing import List, NamedTuple, TYPE_CHECKING
 
 import numpy as np
 import torch
@@ -8,6 +8,9 @@ from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
 from tira.check_format import JsonlFormat, QueryProcessorFormat
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
 
@@ -38,7 +41,7 @@ DOWNLOAD_CONTENTS = {
 DownloadConfig = _DownloadConfig(contents=DOWNLOAD_CONTENTS)
 
 
-def extracted_resource(irds_id, f):
+def extracted_resource(irds_id: str, f) -> Path:
     zip_file = DownloadConfig.context(irds_id, home_path() / "lsr-benchmark" / irds_id.replace("/", "-"))[f].path()
     target_dir = Path(str(zip_file).replace(".zip", "") + "-extracted")
     extract_zip(zip_file, target_dir)
@@ -128,27 +131,26 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
 
 
 class LsrBenchmarkDataset(Dataset):
-    def __init__(self, ir_datasets_id, docs=None, queries=None, qrels=None, segmented=False, documentation=None):
+    def __init__(self, ir_datasets_id, docs=None, queries=None, qrels: "Optional[str]"=None, segmented=False, documentation=None):
+        self.__irds_id = ir_datasets_id
+
         if queries:
             queries = LsrBenchmarkQueries(queries)
 
-        if qrels:
-            qrels_file = qrels
-
+        if qrels is not None:
             class QrelsObj:
                 def stream(self):
-                    qrels_file = extracted_resource(self.__irds_id, "truths") / qrels
-                    return open(qrels_file, "rb")
+                    qrels_file = extracted_resource(ir_datasets_id, "truths") / qrels
+                    return qrels_file.open("rb")
 
-            qrels = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
+            qrels_obj = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
 
         if docs and not segmented:
             docs = LsrBenchmarkDocuments(docs)
         if docs and segmented:
             docs = LsrBenchmarkSegmentedDocuments(docs)
 
-        self.__irds_id = ir_datasets_id
-        super().__init__(docs, queries, qrels, documentation)
+        super().__init__(docs, queries, qrels_obj, documentation)
         self.metadata = MetadataComponent(ir_datasets_id, self)
 
     def embeddings(
