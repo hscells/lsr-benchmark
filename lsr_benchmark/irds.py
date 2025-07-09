@@ -137,6 +137,7 @@ class LsrBenchmarkDataset(Dataset):
 
             class QrelsObj:
                 def stream(self):
+                    qrels_file = extracted_resource(self.__irds_id, "truths") / qrels
                     return open(qrels_file, "rb")
 
             qrels = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
@@ -192,12 +193,12 @@ def extract_zip(zip_file: Path, target_directory: Path):
 def build_dataset(ir_datasets_id: str, segmented: bool):
     docs = "corpus.jsonl.gz"
     queries = "queries.jsonl"
-    # qrels = "qrels.txt" # Remove qrels for now, as they are not downloaded by default yet
+    qrels = "qrels.txt"
 
     return LsrBenchmarkDataset(
         ir_datasets_id=ir_datasets_id,
         docs=docs,
         queries=queries,
-        # qrels=qrels,
+        qrels=qrels,
         segmented=segmented,
     )
