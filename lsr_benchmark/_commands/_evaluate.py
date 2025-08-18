@@ -130,10 +130,10 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
 
 
 def __get_dataset_name(approaches: list[str]) -> str:
-    return "clueweb09/en/trec-web-2009"  # TODO implement
+    # TODO: pull the dataset from the metadata
+    return "clueweb09/en/trec-web-2009"
 
 
-# @click.command()
 @click.argument(
     "approaches",
     type=str,
@@ -144,11 +144,10 @@ def __get_dataset_name(approaches: list[str]) -> str:
     type=__parse_measure,
     required=False,
     multiple=True,
-    default=["ndcg_cut.10",  "P_5", "map_cut.100"],
+    default=["ndcg_cut.10",  "P_5", "map_cut.100", "runtime_wallclock", "energy_total"],
     help="The dataset id or a local directory.",
 )
 def evaluate(approaches: list[str], measure: list[str]) -> int:
-    # TODO: pull the dataset from the metadata
     approaches = [x for xs in map(glob, approaches) for x in xs]
 
     dataset = __get_dataset_name(approaches)

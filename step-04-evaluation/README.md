@@ -1,11 +1,19 @@
 
-
+Most basic form:
 ```bash
 lsr-benchmark evaluate.py seismic-outputs-*.zip
 ```
 
-# Metrics
+With specific metrics:
+```bash
+lsr-benchmark evaluate.py seismic-outputs-*.zip -m P_10 -m energy_total
+```
 
+# Metrics
+**Effectiveness**
+The effectiveness metrics are the standard [trec_eval metrics](https://github.com/usnistgov/trec_eval).
+
+**Efficiency**
 Name      | Description | Parameters
 ----------|-------------|-----------
 `runtime` | | **wallclock**, user, system
