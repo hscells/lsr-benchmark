@@ -7,8 +7,10 @@ from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadConfig
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
 
+from ._commands._evaluate import evaluate
 
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
+
 
 def register_to_ir_datasets():
     for k in SUPPORTED_IR_DATASETS:
@@ -24,13 +26,11 @@ def register_to_ir_datasets():
 def load(ir_datasets_id: str):
     return build_dataset(ir_datasets_id, False)
 
+
 @click.group()
 def main():
     pass
 
-@main.command()
-def foo():
-    print("foo")
 
 def create_subsampled_corpus(directory, config):
     subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
@@ -38,7 +38,7 @@ def create_subsampled_corpus(directory, config):
 
     target_directory.mkdir(exist_ok=True)
     with gzip.open(target_directory / "document-mapping.json.gz", "wt") as f:
-        f.write(json.dumps({i:i for i in subsample}))
+        f.write(json.dumps({i: i for i in subsample}))
 
     materialize_raw_corpus(target_directory, subsample, config)
     materialize_inputs(target_directory, config)
@@ -51,10 +51,12 @@ def create_subsampled_corpus(directory, config):
 def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     create_subsampled_corpus(directory, config)
-    #materialize_corpus(directory, config)
-    #materialize_inputs(directory, config)
-    #materialize_truths(directory, config)
+    # materialize_corpus(directory, config)
+    # materialize_inputs(directory, config)
+    # materialize_truths(directory, config)
+
+
+main.command()(evaluate)
 
 if __name__ == '__main__':
     main()
-

@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import defaultdict
+from glob import glob
 from gzip import GzipFile
 from io import TextIOWrapper
 from typing import TYPE_CHECKING, Mapping
@@ -57,7 +58,7 @@ def __get_nested_or_default(d: "Mapping[_KT, Union[dict, _VT]]", keys: "list[_KT
 
 def __read_metrics(name: str) -> "tuple[dict[str, Metadata], list[ScoredDoc]]":
     metadata: "dict[str, Metadata]" = {}
-    with ZipFile(f"{name}.zip") as archive:
+    with ZipFile(name) as archive:
         for entry in archive.filelist:
             if (m := re.match(r"(\w+)-metadata.ya?ml", entry.filename)) is not None:
                 with archive.open(entry) as file:
@@ -128,17 +129,15 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
     return (measure, 'tirex', __parse_tirex_measure(measure))
 
 
-@click.command()
+def __get_dataset_name(approaches: list[str]) -> str:
+    return "clueweb09/en/trec-web-2009"  # TODO implement
+
+
+# @click.command()
 @click.argument(
     "approaches",
     type=str,
     nargs=-1,
-)
-@click.option(
-    "--dataset",
-    type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS),
-    required=True,
-    help="The dataset id or a local directory.",
 )
 @click.option(
     "-m", "--measure",
@@ -148,12 +147,12 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
     default=["ndcg_cut.10",  "P_5", "map_cut.100"],
     help="The dataset id or a local directory.",
 )
-def main(approaches: list[str], dataset: str, measure: list[str]) -> int:
+def evaluate(approaches: list[str], measure: list[str]) -> int:
     # TODO: pull the dataset from the metadata
-    # TODO: Suppport the following syntax:
-    #   lsr-benchmark eval seismic-outputs-01 seismic-outputs-02 -m P_10 -m energy_total
-    #  And globbing:
-    #   lsr-benchmark eval seismic-outputs-* -m P_10 -m energy_total
+    approaches = [x for xs in map(glob, approaches) for x in xs]
+
+    dataset = __get_dataset_name(approaches)
+
     dset = lsr_benchmark.load(dataset)
     assert dset.has_qrels()
 
@@ -174,7 +173,3 @@ def main(approaches: list[str], dataset: str, measure: list[str]) -> int:
         scores[approach].update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
     print(pd.DataFrame(scores))
     return 0
-
-
-if __name__ == "__main__":
-    main()

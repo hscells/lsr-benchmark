@@ -1,7 +1,7 @@
 
 
 ```bash
-python3 step-04-evaluation/evaluate.py seismic-outputs-01 seismic-outputs-02 --dataset clueweb09/en/trec-web-2009
+lsr-benchmark evaluate.py seismic-outputs-*.zip
 ```
 
 # Metrics
