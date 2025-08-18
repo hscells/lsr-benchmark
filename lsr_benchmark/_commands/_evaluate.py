@@ -4,6 +4,7 @@ from collections import defaultdict
 from glob import glob
 from gzip import GzipFile
 from io import TextIOWrapper
+from pathlib import Path
 from typing import TYPE_CHECKING, Mapping
 from zipfile import ZipFile
 
@@ -134,6 +135,25 @@ def __get_dataset_name(approaches: list[str]) -> str:
     return "clueweb09/en/trec-web-2009"
 
 
+def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
+    suffix_to_routine: dict[str, Callable[[pd.DataFrame], None]] = {
+        ".csv": lambda df: df.to_csv(specifier),
+        ".xlsx": lambda df: df.to_excel(specifier),
+        ".htm": lambda df: df.to_html(specifier),
+        ".html": lambda df: df.to_html(specifier),
+        ".json": lambda df: df.to_json(specifier),
+        ".tex": lambda df: df.to_latex(specifier),
+        ".md": lambda df: df.to_markdown(specifier),
+        ".parquet": lambda df: df.to_parquet(specifier),
+    }
+    if specifier == "-":
+        return print
+    elif (routine := suffix_to_routine.get(Path(specifier).suffix, None)) is not None:
+        return routine
+    else:
+        raise ValueError(f"The suffix of {specifier} is not known.")
+
+
 @click.argument(
     "approaches",
     type=str,
@@ -147,10 +167,18 @@ def __get_dataset_name(approaches: list[str]) -> str:
     default=["ndcg_cut.10",  "P_5", "map_cut.100", "runtime_wallclock", "energy_total"],
     help="The dataset id or a local directory.",
 )
-def evaluate(approaches: list[str], measure: list[str]) -> int:
+@click.option(
+    "-o", "--out",
+    type=str,
+    required=False,
+    multiple=False,
+    default="-",
+    help="The output file to write to. Use - to print the results to stdout. Default: -",
+)
+def evaluate(approaches: list[str], measure: list[str], out: str) -> int:
     approaches = [x for xs in map(glob, approaches) for x in xs]
-
     dataset = __get_dataset_name(approaches)
+    output_routine = __get_output_routine(out)
 
     dset = lsr_benchmark.load(dataset)
     assert dset.has_qrels()
@@ -170,5 +198,6 @@ def evaluate(approaches: list[str], measure: list[str]) -> int:
         # Update with ir_measures effectiveness measures
         irmeasures = set(m for _, t, m in measure if t == 'ir_measure')
         scores[approach].update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
-    print(pd.DataFrame(scores))
+
+    output_routine(pd.DataFrame(scores))
     return 0
