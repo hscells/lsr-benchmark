@@ -22,7 +22,7 @@ import ir_datasets
 @click.option("--retrieval", type=str, required=False, default="BM25", help="The retrieval model.")
 @click.option("--k", type=int, required=False, default=10, help="The retrieval depth.")
 def main(dataset, output, retrieval, k):
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
     ensure_pyterrier_is_loaded(boot_packages=())
