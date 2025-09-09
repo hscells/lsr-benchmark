@@ -13,5 +13,5 @@ If you want to run it locally, please install the dependencies via `pip3 install
 To make predictions on a dataset, run:
 
 ```
-./run-pyterrier.py --dataset lsr-benchmark/clueweb09/en/trec-web-2009 --retrieval bm25 --output output-dir
+./run-pyterrier.py --dataset clueweb09/en/trec-web-2009 --retrieval BM25 --output output-dir
 ```
