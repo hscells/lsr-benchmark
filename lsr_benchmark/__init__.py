@@ -1,5 +1,4 @@
 __version__ = "0.0.1"
-import click
 import json
 import gzip
 from pathlib import Path
@@ -8,19 +7,21 @@ from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadCo
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
 
 from ._commands._evaluate import evaluate
+import os
 
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
+def register_to_ir_datasets(dataset=None):
+    if dataset is None:
+        for k in SUPPORTED_IR_DATASETS:
+            irds_id = f"lsr-benchmark/{k}/segmented"
+            if irds_id not in registry:
+                registry.register(irds_id, build_dataset(k, True))
 
-def register_to_ir_datasets():
-    for k in SUPPORTED_IR_DATASETS:
-        irds_id = f"lsr-benchmark/{k}/segmented"
-        if irds_id not in registry:
-            registry.register(irds_id, build_dataset(k, True))
-
-        irds_id = f"lsr-benchmark/{k}"
-        if irds_id not in registry:
-            registry.register(irds_id, build_dataset(k, False))
+            irds_id = f"lsr-benchmark/{k}"
+            if irds_id not in registry:
+                registry.register(irds_id, build_dataset(k, False))
+    if os.path.isdir(dataset):
 
 
 def load(ir_datasets_id: str):
