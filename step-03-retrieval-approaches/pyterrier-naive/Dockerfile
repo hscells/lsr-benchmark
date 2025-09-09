@@ -8,10 +8,7 @@ ADD requirements.txt /tmp/requirements.txt
 
 RUN pip3 install -r /tmp/requirements.txt
 
-ENV PYTERRIER_VERSION=5.11
-ENV PYTERRIER_HELPERE_VERSION=0.0.8
-
-python3 -c "import pyterrier as pt; pt.init(version='${PYTERRIER_VERSION}', helper_version='${PYTERRIER_HELPER_VERSION}');"
+RUN python3 -c "import pyterrier as pt; pt.init();"
 
 ADD run-pyterrier.py /run-pyterrier.py
 
