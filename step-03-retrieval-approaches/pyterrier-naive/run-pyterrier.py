@@ -7,13 +7,13 @@ import pyterrier as pt
 from pathlib import Path
 from shutil import rmtree
 import pandas as pd
-from tira.third_party_integrations import ensure_pyterrier_is_loaded,  normalize_run, ir_datasets
-
+from tira.third_party_integrations import ensure_pyterrier_is_loaded,  normalize_run
+import ir_datasets
 
 @click.command()
 @click.option(
     "--dataset",
-    type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS),
+    type=lsr_benchmark.utils.ClickParamTypeLsrDataset(),
     required=True,
     help="The dataset id or a local directory.",
 )
@@ -23,9 +23,9 @@ from tira.third_party_integrations import ensure_pyterrier_is_loaded,  normalize
 @click.option("--k", type=int, required=False, default=10, help="The retrieval depth.")
 def main(dataset, output, retrieval, k):
     output.mkdir(parents=True)
-    ensure_pyterrier_is_loaded(boot_packages=())
-    lsr_benchmark.register_to_ir_datasets()
+    lsr_benchmark.register_to_ir_datasets(dataset)
     dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
+    ensure_pyterrier_is_loaded(boot_packages=())
 
     documents = [{"docno": i.doc_id, "text": i.default_text()} for i in dataset.docs_iter()]
 
