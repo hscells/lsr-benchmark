@@ -7,11 +7,12 @@ from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadCo
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
 from click import group, argument
 
+SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
+
 from ._commands._evaluate import evaluate
-import .utils
+import lsr_benchmark.utils
 import os
 
-SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 def register_to_ir_datasets(dataset=None):
     if dataset and os.path.isdir(dataset):
