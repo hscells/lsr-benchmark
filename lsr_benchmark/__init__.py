@@ -5,6 +5,7 @@ from pathlib import Path
 from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadConfig
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
+import click
 
 from ._commands._evaluate import evaluate
 import os
@@ -12,9 +13,10 @@ import os
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 def register_to_ir_datasets(dataset=None):
-    if os.path.isdir(dataset):
-        registry.register(irds_id, build_dataset(k, False))
-
+    if dataset and os.path.isdir(dataset):
+        registry.register(dataset, build_dataset(dataset, False))
+    elif dataset and dataset not in SUPPORTED_IR_DATASETS:
+        raise ValueError(f"Can not register {dataset}.")
     else:
         for k in SUPPORTED_IR_DATASETS:
             irds_id = f"lsr-benchmark/{k}/segmented"
