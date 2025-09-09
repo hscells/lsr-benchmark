@@ -8,6 +8,7 @@ from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materia
 from click import group, argument
 
 from ._commands._evaluate import evaluate
+import .utils
 import os
 
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
