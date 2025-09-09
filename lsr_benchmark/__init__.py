@@ -5,7 +5,7 @@ from pathlib import Path
 from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadConfig
 from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
-import click
+from click import group, argument
 
 from ._commands._evaluate import evaluate
 import os
@@ -32,7 +32,7 @@ def load(ir_datasets_id: str):
     return build_dataset(ir_datasets_id, False)
 
 
-@click.group()
+@group()
 def main():
     pass
 
@@ -52,7 +52,7 @@ def create_subsampled_corpus(directory, config):
 
 
 @main.command()
-@click.argument('directory', type=Path)
+@argument('directory', type=Path)
 def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     create_subsampled_corpus(directory, config)
