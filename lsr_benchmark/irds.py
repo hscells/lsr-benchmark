@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, NamedTuple, TYPE_CHECKING
 
 import numpy as np
-import torch
 from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
@@ -69,7 +68,7 @@ class LsrBenchmarkDocument(NamedTuple):
 
 class LsrBenchmarkDocumentEmbedding(NamedTuple):
     doc_id: str
-    embedding: torch.Tensor
+    embedding: np.array
 
 
 class LsrBenchmarkSegmentedDocument(NamedTuple):
@@ -93,7 +92,7 @@ class LsrBenchmarkQueries(BaseQueries):
 
 class LsrBenchmarkQueryEmbedding(NamedTuple):
     query_id: str
-    embedding: torch.Tensor
+    embedding: np.array
 
 
 class LsrBenchmarkDocuments(BaseDocs):
