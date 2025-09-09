@@ -19,3 +19,12 @@ class TestIrdsIntegration(unittest.TestCase):
 
         self.assertEqual(3, len(list(ds.queries_iter())))
         self.assertEqual(4, len(list(ds.docs_iter())))
+
+
+    def test_from_local_directory_with_prefix(self):
+        resource_dir = str(Path(__file__).parent / "resources" / "example-dataset")
+        register_to_ir_datasets(resource_dir)
+        ds = ir_datasets.load("lsr-benchmark/" + resource_dir)
+
+        self.assertEqual(3, len(list(ds.queries_iter())))
+        self.assertEqual(4, len(list(ds.docs_iter())))

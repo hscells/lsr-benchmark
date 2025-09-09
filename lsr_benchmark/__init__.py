@@ -16,7 +16,10 @@ import os
 
 def register_to_ir_datasets(dataset=None):
     if dataset and os.path.isdir(dataset):
-        registry.register(dataset, build_dataset(dataset, False))
+        if dataset not in registry:
+            ds = build_dataset(dataset, False)
+            registry.register(dataset, ds)
+            registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset not in SUPPORTED_IR_DATASETS:
         raise ValueError(f"Can not register {dataset}.")
     else:
