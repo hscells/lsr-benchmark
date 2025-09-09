@@ -12,7 +12,10 @@ import os
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 def register_to_ir_datasets(dataset=None):
-    if dataset is None:
+    if os.path.isdir(dataset):
+        registry.register(irds_id, build_dataset(k, False))
+
+    else:
         for k in SUPPORTED_IR_DATASETS:
             irds_id = f"lsr-benchmark/{k}/segmented"
             if irds_id not in registry:
@@ -21,7 +24,6 @@ def register_to_ir_datasets(dataset=None):
             irds_id = f"lsr-benchmark/{k}"
             if irds_id not in registry:
                 registry.register(irds_id, build_dataset(k, False))
-    if os.path.isdir(dataset):
 
 
 def load(ir_datasets_id: str):
