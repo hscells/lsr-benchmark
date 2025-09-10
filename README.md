@@ -40,10 +40,14 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 |corpus-subsamples/clueweb12/en/trec-web-2013| OK | | |
 |corpus-subsamples/clueweb12/en/trec-web-2014| OK | | |
 |corpus-subsamples/clueweb12/b13/trec-misinfo-2019| OK | | |
+|TREC RAG 24||||
 |TREC DL 19 (Passage)||||
 |TREC DL 20 (Passage)||||
 |TREC DL 21 (Passage)||||
 |TREC DL 23 (Passage)||||
+|TREC Covid||||
+|Robust04||||
+|TREC Precision Medicine|||
 |Argsme Touché 2020||||
 |Argsme Touché 2021||||
 |GOV Web track 2002||||
@@ -52,8 +56,6 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 |GOV2 TB track 2004||||
 |GOV2 TB track 2005||||
 |GOV2 TB track 2006||||
-|TREC RAG 24||||
-|Robust04||||
 |TREC-7||||
 |TREC-8||||
 |WaPo TREC Core 2018||||
