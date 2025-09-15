@@ -1,6 +1,16 @@
 from click import ParamType
 from lsr_benchmark import SUPPORTED_IR_DATASETS
 import os
+from tira.rest_api_client import Client
+
+_IR_DATASETS_FROM_TIRA = None
+
+def ir_datasets_from_tira():
+    global _IR_DATASETS_FROM_TIRA
+    if _IR_DATASETS_FROM_TIRA is None:
+        tira = Client()
+        _IR_DATASETS_FROM_TIRA = list(tira.datasets("task_1").keys())
+    return _IR_DATASETS_FROM_TIRA
 
 
 class ClickParamTypeLsrDataset(ParamType):
@@ -13,8 +23,11 @@ class ClickParamTypeLsrDataset(ParamType):
         if os.path.isdir(value):
             return os.path.abspath(value)
 
+        available_datasets = list(SUPPORTED_IR_DATASETS.keys())
+        available_datasets += ir_datasets_from_tira()
+
         msg = f"{value!r} is not a supported dataset "
-        f"({', '.join(SUPPORTED_IR_DATASETS)}) "
+        f"({', '.join(available_datasets)}) "
         "or a valid directory path"
 
         self.fail(msg, param, ctx)
