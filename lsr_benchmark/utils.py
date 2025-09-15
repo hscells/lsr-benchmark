@@ -23,7 +23,7 @@ class ClickParamTypeLsrDataset(ParamType):
         if os.path.isdir(value):
             return os.path.abspath(value)
 
-        available_datasets = list(SUPPORTED_IR_DATASETS.keys())
+        available_datasets = list(SUPPORTED_IR_DATASETS)
         available_datasets += ir_datasets_from_tira()
 
         msg = f"{value!r} is not a supported dataset "
