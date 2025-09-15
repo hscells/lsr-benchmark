@@ -2,11 +2,9 @@ __version__ = "0.0.1"
 import json
 from pathlib import Path
 from ir_datasets import registry
-from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS
+from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, ir_datasets_from_tira
 from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materialize_qrels
 from click import group, argument
-
-from lsr_benchmark.utils import ir_datasets_from_tira
 
 from tirex_tracker import tracking, ExportFormat
 
