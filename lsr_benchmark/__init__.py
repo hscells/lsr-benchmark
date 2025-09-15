@@ -3,8 +3,10 @@ import json
 from pathlib import Path
 from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS
-from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materialize_qrels, create_subsample
+from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materialize_qrels
 from click import group, argument
+
+from lsr_benchmark.utils import ir_datasets_from_tira
 
 from tirex_tracker import tracking, ExportFormat
 
@@ -18,6 +20,19 @@ def register_to_ir_datasets(dataset=None):
     if dataset and os.path.isdir(dataset):
         if dataset not in registry:
             ds = build_dataset(dataset, False)
+            registry.register(dataset, ds)
+            registry.register("lsr-benchmark/" + dataset, ds)
+    elif dataset and dataset in ir_datasets_from_tira():
+        if dataset not in registry:
+            from tira.rest_api_client import Client
+            tira = Client()
+            system_inputs = tira.download_dataset(task=None, dataset=dataset, truth_dataset=False)
+            truths = tira.download_dataset(task=None, dataset=dataset, truth_dataset=True)
+            print(f"system_inputs: {system_inputs}")
+            print(f"truths: {truths}")
+
+            ds = build_dataset(system_inputs, False)
+
             registry.register(dataset, ds)
             registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset not in SUPPORTED_IR_DATASETS:
