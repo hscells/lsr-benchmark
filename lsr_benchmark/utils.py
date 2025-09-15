@@ -23,8 +23,12 @@ class ClickParamTypeLsrDataset(ParamType):
         if os.path.isdir(value):
             return os.path.abspath(value)
 
+        irds_from_tira = ir_datasets_from_tira()
+        if value in irds_from_tira:
+            return value
+
         available_datasets = list(SUPPORTED_IR_DATASETS)
-        available_datasets += ir_datasets_from_tira()
+        available_datasets += irds_from_tira
 
         msg = f"{value!r} is not a supported dataset " + \
         f"({', '.join(available_datasets)}) " + \
