@@ -43,12 +43,11 @@ def main():
 
 
 def create_subsampled_corpus(directory, config):
-    subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
     target_directory = directory
 
     target_directory.mkdir(exist_ok=True)
     with tracking(export_file_path=Path(target_directory) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
-        materialize_corpus(target_directory, subsample, config)
+        materialize_corpus(target_directory, config)
         materialize_queries(target_directory, config)
         materialize_qrels(target_directory/"qrels.txt", config)
 
