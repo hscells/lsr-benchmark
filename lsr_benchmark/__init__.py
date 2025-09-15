@@ -3,9 +3,11 @@ import json
 import gzip
 from pathlib import Path
 from ir_datasets import registry
-from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, DownloadConfig
-from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_raw_corpus, create_subsample
+from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS
+from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_queries, materialize_qrels, create_subsample
 from click import group, argument
+
+from tirex_tracker import tracking, ExportFormat
 
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
@@ -44,16 +46,13 @@ def main():
 
 def create_subsampled_corpus(directory, config):
     subsample = create_subsample(config["runs"], config["ir-datasets-id"], config["subsample_depth"], directory)
-    target_directory = directory / "subsampled-corpus"
+    target_directory = directory
 
     target_directory.mkdir(exist_ok=True)
-    with gzip.open(target_directory / "document-mapping.json.gz", "wt") as f:
-        f.write(json.dumps({i: i for i in subsample}))
-
-    materialize_raw_corpus(target_directory, subsample, config)
-    materialize_inputs(target_directory, config)
-    materialize_truths(target_directory, config)
-    (target_directory / "document-mapping.json.gz").unlink()
+    with tracking(export_file_path=Path(target_directory) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
+        materialize_corpus(target_directory, subsample, config)
+        materialize_queries(target_directory, config)
+        materialize_qrels(target_directory/"qrels.txt", config)
 
 
 @main.command()
@@ -61,10 +60,6 @@ def create_subsampled_corpus(directory, config):
 def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     create_subsampled_corpus(directory, config)
-    # materialize_corpus(directory, config)
-    # materialize_inputs(directory, config)
-    # materialize_truths(directory, config)
-
 
 main.command()(evaluate)
 

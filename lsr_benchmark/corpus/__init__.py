@@ -1,36 +1,19 @@
 from tqdm import tqdm
 import ir_datasets
-import tempfile
-from pathlib import Path
 from .corpus_subsampling import create_subsample
 from .segmentation import segmented_document
 import gzip
 import json
-import shutil
-from tirex_tracker import tracking, ExportFormat
-from tira.ir_datasets_loader import IrDatasetsLoader
 
-import zipfile
-import os
-
-
-def zip_directory(folder_path, output_path):
-    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        len_prefix = len(os.path.abspath(folder_path)) + 1  # to remove the base folder path
-        for root, dirs, files in os.walk(folder_path):
-            for file in files:
-                abs_path = os.path.join(root, file)
-                rel_path = os.path.abspath(abs_path)[len_prefix:]
-                zipf.write(abs_path, arcname=rel_path)
 
 def load_docs(ir_datasets_id, subsample):
     ret = {}
     docs_store = ir_datasets.load(ir_datasets_id).docs_store()
-    irds_loader = IrDatasetsLoader()
+
     skipped = 0
     for doc in tqdm(subsample):
         try:
-            ret[doc] = json.loads(irds_loader.map_doc(docs_store.get(doc)))
+            ret[doc] = docs_store.get(doc).default_text()
         except:
             skipped += 1
     print(f"Skipped {skipped} docs")
@@ -100,26 +83,3 @@ def materialize_qrels(output_qrels, config):
     with open(output_qrels, 'w') as f:
         for qrel in dataset.qrels_iter():
             f.write(f"{qrel.query_id} 0 {qrel.doc_id} {qrel.relevance}\n")
-
-def materialize_inputs(directory, config):
-    output_zip = directory / "inputs.zip"
-    if output_zip.exists():
-        return
-    with tempfile.TemporaryDirectory() as tmp_dir:
-
-        with tracking(export_file_path=Path(tmp_dir) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
-            materialize_queries(Path(tmp_dir), config)
-            shutil.copy(directory/"corpus.jsonl.gz", Path(tmp_dir)/"corpus.jsonl.gz")
-        zip_directory(tmp_dir, output_zip)
-
-
-def materialize_truths(directory, config):
-    output_zip = directory / "truths.zip"
-    if output_zip.exists():
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        with tracking(export_file_path=Path(tmp_dir) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
-            materialize_queries(Path(tmp_dir), config)
-            materialize_qrels(Path(tmp_dir)/"qrels.txt", config)
-        zip_directory(tmp_dir, output_zip)
