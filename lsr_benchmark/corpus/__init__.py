@@ -7,7 +7,7 @@ from .segmentation import segmented_document
 import gzip
 import json
 import shutil
-from uuid import uuid4
+from tirex_tracker import tracking, ExportFormat
 from tira.ir_datasets_loader import IrDatasetsLoader
 
 import zipfile
@@ -53,24 +53,15 @@ def materialize_raw_corpus(directory, subsample, config):
 
 def materialize_corpus(directory, config):
     ir_datasets_id = irds_id_from_config(config)
-    if (directory/"document-mapping.json.gz").is_file():
+    if (directory/"corpus.jsonl.gz").is_file():
         return
+
     subsample = create_subsample(config["runs"], ir_datasets_id, config["subsample_depth"], directory)
     docs = load_docs(ir_datasets_id, subsample)
-    docs = segmented_document(docs, config.get("passage_size", 80))
-    doc_mapping = {}
+    docs = segmented_document(docs, config.get("passage_size", 200))
     with gzip.open(directory/"corpus.jsonl.gz", 'wt') as f:
         for doc in docs.values():
-            old_id = doc["doc_id"]
-            new_id = str(uuid4())
-            assert new_id not in doc_mapping
-            assert old_id not in doc_mapping.keys()
-            doc_mapping[new_id] = old_id
-            doc["doc_id"] = new_id
             f.write(json.dumps(doc) + '\n')
-
-    with gzip.open(directory/"document-mapping.json.gz", "wt") as f:
-        f.write(json.dumps(doc_mapping))
 
 def materialize_queries(directory, config):
     from tira.ir_datasets_loader import IrDatasetsLoader
@@ -98,33 +89,27 @@ def materialize_queries(directory, config):
             for l in queries_mapped_xml:
                 f.write(str(l) + '\n')
 
-def materialize_qrels(source_directory, output_qrels, config):
+def materialize_qrels(output_qrels, config):
     ir_datasets_id = irds_id_from_config(config)
 
     if output_qrels.exists():
         return
 
     dataset = ir_datasets.load(ir_datasets_id)
- 
-    with gzip.open(source_directory/"document-mapping.json.gz", "rt") as f:
-        document_mapping = {v:k for k,v in json.loads(f.read()).items()}
 
-    skipped = set()
     with open(output_qrels, 'w') as f:
         for qrel in dataset.qrels_iter():
-            if qrel.doc_id not in document_mapping:
-                skipped.add(qrel.doc_id)
-                continue
-            f.write(f"{qrel.query_id} 0 {document_mapping[qrel.doc_id]} {qrel.relevance}\n")
-    print("skipped qrels", len(skipped))
+            f.write(f"{qrel.query_id} 0 {qrel.doc_id} {qrel.relevance}\n")
 
 def materialize_inputs(directory, config):
     output_zip = directory / "inputs.zip"
     if output_zip.exists():
         return
     with tempfile.TemporaryDirectory() as tmp_dir:
-        materialize_queries(Path(tmp_dir), config)
-        shutil.copy(directory/"corpus.jsonl.gz", Path(tmp_dir)/"corpus.jsonl.gz")
+
+        with tracking(export_file_path=Path(tmp_dir) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
+            materialize_queries(Path(tmp_dir), config)
+            shutil.copy(directory/"corpus.jsonl.gz", Path(tmp_dir)/"corpus.jsonl.gz")
         zip_directory(tmp_dir, output_zip)
 
 
@@ -134,7 +119,7 @@ def materialize_truths(directory, config):
         return
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        materialize_queries(Path(tmp_dir), config)
-        materialize_qrels(directory, Path(tmp_dir)/"qrels.txt", config)
+        with tracking(export_file_path=Path(tmp_dir) / "dataset-metadata.yml", export_format=ExportFormat.IR_METADATA):
+            materialize_queries(Path(tmp_dir), config)
+            materialize_qrels(Path(tmp_dir)/"qrels.txt", config)
         zip_directory(tmp_dir, output_zip)
-        

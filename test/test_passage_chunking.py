@@ -17,5 +17,5 @@ class TestPassageChunking(unittest.TestCase):
 
     def test_chunking(self):
         docs = load_docs()
-        actual = segmented_document(docs)
+        actual = segmented_document(docs, 200)
         verify_as_json(actual)
