@@ -26,8 +26,8 @@ class ClickParamTypeLsrDataset(ParamType):
         available_datasets = list(SUPPORTED_IR_DATASETS)
         available_datasets += ir_datasets_from_tira()
 
-        msg = f"{value!r} is not a supported dataset "
-        f"({', '.join(available_datasets)}) "
+        msg = f"{value!r} is not a supported dataset " + \
+        f"({', '.join(available_datasets)}) " + \
         "or a valid directory path"
 
         self.fail(msg, param, ctx)
