@@ -1,10 +1,9 @@
 __version__ = "0.0.1"
 import json
-import gzip
 from pathlib import Path
 from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS
-from lsr_benchmark.corpus import materialize_corpus, materialize_truths, materialize_inputs, materialize_queries, materialize_qrels, create_subsample
+from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materialize_qrels, create_subsample
 from click import group, argument
 
 from tirex_tracker import tracking, ExportFormat
@@ -12,7 +11,6 @@ from tirex_tracker import tracking, ExportFormat
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
-import lsr_benchmark.utils
 import os
 
 
