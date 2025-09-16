@@ -22,14 +22,7 @@ def register_to_ir_datasets(dataset=None):
             registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset in ir_datasets_from_tira():
         if dataset not in registry:
-            from tira.rest_api_client import Client
-            tira = Client()
-            system_inputs = tira.download_dataset(task=None, dataset=dataset, truth_dataset=False)
-            truths = tira.download_dataset(task=None, dataset=dataset, truth_dataset=True)
-            print(f"system_inputs: {system_inputs}")
-            print(f"truths: {truths}")
-
-            ds = build_dataset(system_inputs, False)
+            ds = build_dataset(dataset, False)
 
             registry.register(dataset, ds)
             registry.register("lsr-benchmark/" + dataset, ds)

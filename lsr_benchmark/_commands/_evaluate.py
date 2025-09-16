@@ -5,7 +5,7 @@ from glob import glob
 from gzip import GzipFile
 from io import TextIOWrapper
 from pathlib import Path
-from typing import TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING, Mapping, Dict, Any
 from zipfile import ZipFile
 
 import click
@@ -43,9 +43,9 @@ def __get_nested(
     out: "Union[Mapping[_KT, Union[dict, _VT]], _VT]" = d
     for i, key in enumerate(keys):
         if not isinstance(out, Mapping):
-            raise TypeError(f"The value at {'>'.join(map(str, keys[:i]))} is not a mapping")
+            raise TypeError(f"The value at {'>'.join(map(str, keys[:i]))} is not a mapping. Have {out}.")
         if key not in out:
-            raise KeyError(f"The key {'>'.join(map(str, keys[:i+1]))} could not be found")
+            raise KeyError(f"The key {'>'.join(map(str, keys[:i+1]))} could not be found. Have {out}.")
         out = out[key]
     return out
 
@@ -57,17 +57,32 @@ def __get_nested_or_default(d: "Mapping[_KT, Union[dict, _VT]]", keys: "list[_KT
         return default
 
 
+
 def __read_metrics(name: str) -> "tuple[dict[str, Metadata], list[ScoredDoc]]":
     metadata: "dict[str, Metadata]" = {}
-    with ZipFile(name) as archive:
-        for entry in archive.filelist:
-            if (m := re.match(r"(\w+)-metadata.ya?ml", entry.filename)) is not None:
-                with archive.open(entry) as file:
-                    metadata[m.group(1)] = yaml.safe_load(file)
-        with archive.open("run.txt.gz", mode="r") as compressed:
-            with GzipFile(fileobj=compressed, mode="r") as binary:
-                with TextIOWrapper(binary, encoding="utf-8") as file:
-                    run = list(ir_measures.read_trec_run(file))
+
+    if Path(name).is_dir():
+        for m in glob(f"{name}/*-metadata.y*ml"):
+            metadata[m.split("-")[0].split("/")[-1]] = yaml.safe_load(Path(m).read_text())
+        if (Path(name) / "run.txt").is_file():
+            run = list(ir_measures.read_trec_run((Path(name) / "run.txt").read_text()))
+        else:
+            run = list(ir_measures.read_trec_run(Path(name) / "run.txt.gz"))
+    else:
+        with ZipFile(name) as archive:
+            for entry in archive.filelist:
+                if (m := re.match(r"(\w+)-metadata.ya?ml", entry.filename)) is not None:
+                    with archive.open(entry) as file:
+                        metadata[m.group(1)] = yaml.safe_load(file)
+            with archive.open("run.txt.gz", mode="r") as compressed:
+                with GzipFile(fileobj=compressed, mode="r") as binary:
+                    with TextIOWrapper(binary, encoding="utf-8") as file:
+                        run = list(ir_measures.read_trec_run(file))
+    
+    if len(metadata) == 0:
+        raise ValueError("I could not read any metadata")
+    if len(run) == 0:
+        raise ValueError("I could not load a run")
     return metadata, run
 
 
@@ -130,9 +145,17 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
     return (measure, 'tirex', __parse_tirex_measure(measure))
 
 
-def __get_dataset_name(approaches: list[str]) -> str:
-    # TODO: pull the dataset from the metadata
-    return "clueweb09/en/trec-web-2009"
+def __get_dataset_name(metadata: Dict[str, Any]) -> str:
+    candidates = set()
+
+    for m in metadata.values():
+        if "data" in m and "test collection" in m["data"] and "name" in m["data"]["test collection"] and m["data"]["test collection"]["name"]:
+            candidates.add(m["data"]["test collection"]["name"])
+
+    if len(candidates) != 1:
+        raise ValueError(f"I can not extract the dataset from the metadata. I found candidates: {list(candidates)}")
+
+    return list(candidates)[0]
 
 
 def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
@@ -177,11 +200,7 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
 )
 def evaluate(approaches: list[str], measure: list[str], out: str) -> int:
     approaches = [x for xs in map(glob, approaches) for x in xs]
-    dataset = __get_dataset_name(approaches)
     output_routine = __get_output_routine(out)
-
-    dset = lsr_benchmark.load(dataset)
-    assert dset.has_qrels()
 
     scores: dict[str, dict[str, float]] = defaultdict(dict)
     for approach in approaches:
@@ -197,6 +216,11 @@ def evaluate(approaches: list[str], measure: list[str], out: str) -> int:
                             f"Measure {name} could not be reported for {approach}.{group} as its metadata is not present")
         # Update with ir_measures effectiveness measures
         irmeasures = set(m for _, t, m in measure if t == 'ir_measure')
+
+        dataset = __get_dataset_name(metadata)
+        dset = lsr_benchmark.load(dataset)
+        assert dset.has_qrels()
+
         scores[approach].update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
 
     output_routine(pd.DataFrame(scores))

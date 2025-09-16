@@ -47,6 +47,7 @@ def ir_datasets_from_tira():
         from tira.rest_api_client import Client
         tira = Client()
         _IR_DATASETS_FROM_TIRA = list(tira.datasets("task_1").keys())
+
     return _IR_DATASETS_FROM_TIRA
 
 DownloadConfig = _DownloadConfig(contents=DOWNLOAD_CONTENTS)
@@ -209,6 +210,22 @@ def extract_zip(zip_file: Path, target_directory: Path):
 
 
 def build_dataset(ir_datasets_id: str, segmented: bool):
+    if ir_datasets_id in ir_datasets_from_tira():
+        from tira.rest_api_client import Client
+        from tira.third_party_integrations import temporary_directory
+        from os import symlink
+        target_dir = temporary_directory()
+        tira = Client()
+        system_inputs = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=False)
+        truths = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=True)
+
+        # TODO this is ugly hacked
+        symlink(system_inputs / "corpus.jsonl.gz", target_dir / "corpus.jsonl.gz")
+        symlink(system_inputs / "queries.jsonl", target_dir / "queries.jsonl")
+        symlink(truths / "qrels.txt", target_dir / "qrels.txt")
+
+        ir_datasets_id = str(target_dir)
+
     docs = "corpus.jsonl.gz"
     queries = "queries.jsonl"
     qrels = "qrels.txt"
