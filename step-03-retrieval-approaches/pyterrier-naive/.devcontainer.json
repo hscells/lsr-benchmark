@@ -12,6 +12,6 @@
     }
   },
   "runArgs": [
-    "--network=host"
+    "--network=host", "--privileged"
   ]
 }
