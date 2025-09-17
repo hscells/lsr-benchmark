@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from lightning_ir import BiEncoderModule, DocDataset, LightningIRDataModule, LightningIRTrainer, QueryDataset
 from tirex_tracker import tracking
+from lsr_benchmark.utils import ClickParamTypeLsrDataset
 
 import lsr_benchmark
 
@@ -20,25 +21,22 @@ def convert_embeddings(embeddings: torch.Tensor):
 @click.command()
 @click.option(
     "--dataset",
-    type=click.Choice(lsr_benchmark.SUPPORTED_IR_DATASETS),
+    type=ClickParamTypeLsrDataset(),
     required=True,
     help="The dataset id or a local directory.",
 )
 @click.option("--model", type=str, required=True, help="The lightning ir model.")
 @click.option("--batch_size", type=int, default=4, help="Number of queries/documents to process in a batch.")
-@click.option("--save_dir", type=Path, default=Path.cwd(), help="Directory to save output embeddings.")
-@click.option("--segmented", is_flag=True, help="Whether to use segmented embeddings.")
-def main(dataset: str, model: str, batch_size: int, save_dir: Path, segmented: bool):
+@click.option("--save_dir", type=Path, required=True, help="Directory to save output embeddings.")
+def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     # register the dataset with ir_datasets
-    lsr_benchmark.register_to_ir_datasets()
+    lsr_benchmark.register_to_ir_datasets(dataset)
 
     # load the model
     module = BiEncoderModule(model_name_or_path=model)
 
     # parse dataset id
     dataset_id = f"lsr-benchmark/{dataset}"
-    if segmented:
-        dataset_id += "/segmented"
 
     trainer = LightningIRTrainer(logger=False)
 
