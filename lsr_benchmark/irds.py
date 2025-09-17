@@ -44,7 +44,7 @@ _IR_DATASETS_FROM_TIRA = None
 
 def ir_datasets_from_tira(force_reload=False):
     global _IR_DATASETS_FROM_TIRA
-    if _IR_DATASETS_FROM_TIRA is None:
+    if _IR_DATASETS_FROM_TIRA is None or force_reload:
         from tira.rest_api_client import Client
         tira = Client()
         _IR_DATASETS_FROM_TIRA = list(tira.datasets(TIRA_LSR_TASK_ID, force_reload).keys())
