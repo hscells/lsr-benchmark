@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
 MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
+TIRA_LSR_TASK_ID = "task_1"
 
 
 DOWNLOAD_CONTENTS = {
@@ -41,12 +42,12 @@ DOWNLOAD_CONTENTS = {
 
 _IR_DATASETS_FROM_TIRA = None
 
-def ir_datasets_from_tira():
+def ir_datasets_from_tira(force_reload=False):
     global _IR_DATASETS_FROM_TIRA
     if _IR_DATASETS_FROM_TIRA is None:
         from tira.rest_api_client import Client
         tira = Client()
-        _IR_DATASETS_FROM_TIRA = list(tira.datasets("task_1").keys())
+        _IR_DATASETS_FROM_TIRA = list(tira.datasets(TIRA_LSR_TASK_ID, force_reload).keys())
 
     return _IR_DATASETS_FROM_TIRA
 

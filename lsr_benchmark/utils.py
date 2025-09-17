@@ -16,6 +16,10 @@ class ClickParamTypeLsrDataset(ParamType):
         if value in irds_from_tira:
             return value
 
+        irds_from_tira = ir_datasets_from_tira(force_reload=True)
+        if value in irds_from_tira:
+            return value
+
         available_datasets = list(SUPPORTED_IR_DATASETS)
         available_datasets += irds_from_tira
 

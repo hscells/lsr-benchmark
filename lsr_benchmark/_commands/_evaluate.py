@@ -191,6 +191,14 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
     help="The dataset id or a local directory.",
 )
 @click.option(
+    "--upload",
+    type=bool,
+    default=False,
+    is_flag=True,
+    required=False,
+    help="Upload to tira.",
+)
+@click.option(
     "-o", "--out",
     type=str,
     required=False,
@@ -198,7 +206,7 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
     default="-",
     help="The output file to write to. Use - to print the results to stdout. Default: -",
 )
-def evaluate(approaches: list[str], measure: list[str], out: str) -> int:
+def evaluate(approaches: list[str], measure: list[str], out: str, upload: bool) -> int:
     approaches = [x for xs in map(glob, approaches) for x in xs]
     output_routine = __get_output_routine(out)
 
@@ -222,6 +230,11 @@ def evaluate(approaches: list[str], measure: list[str], out: str) -> int:
         assert dset.has_qrels()
 
         scores[approach].update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
+
+        if upload:
+            from tira.tira_cli import upload_command
+            from lsr_benchmark.irds import TIRA_LSR_TASK_ID
+            upload_command(dataset=dataset, directory=approach, dry_run=False, system=approach, default_task=TIRA_LSR_TASK_ID)
 
     output_routine(pd.DataFrame(scores))
     return 0
