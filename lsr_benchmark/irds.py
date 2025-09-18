@@ -159,7 +159,10 @@ class LsrBenchmarkDocuments(BaseDocs):
 
     def docs(self):
         if not self.__docs:
-            docs_file = extracted_resource(self.__irds_id, "inputs") / self.__corpus_file
+            if os.path.is_file(self.__corpus_file):
+                docs_file = Path(self.__corpus_file)
+            else:
+                docs_file = extracted_resource(self.__irds_id, "inputs") / self.__corpus_file
             reader = JsonlFormat()
             reader.apply_configuration_and_throw_if_invalid(
                 {"required_fields": ["doc_id", "segments"], "max_size_mb": 2500}
