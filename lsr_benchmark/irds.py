@@ -8,6 +8,7 @@ from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
 from tira.check_format import JsonlFormat, QueryProcessorFormat
 import os
+from glob import glob
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -41,6 +42,34 @@ DOWNLOAD_CONTENTS = {
 
 
 _IR_DATASETS_FROM_TIRA = None
+
+def embeddings(
+        dataset_id: str, model_name: str, text_type: str
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+    from tira.rest_api_client import Client
+    tira = Client()
+    embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/maik-lsr/{model_name}", dataset_id) / text_type
+    embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
+
+    try:
+        from tirex_tracker import register_file
+        for i in glob(f"{embedding_dir}/*.yml") + glob(f"{embedding_dir}/*.yaml"):
+            register_file(embedding_dir, i.split("/")[-1])
+    except:
+        pass
+
+    ids = (embedding_dir / f"{text_type}-ids.txt").read_text().strip().split("\n")
+
+    ret = []
+    ptr_start = 0
+    for doc_id, ptr_end in zip(ids, embeddings["indptr"][1:]):
+        tokens = embeddings["indices"][ptr_start:ptr_end].astype("U30")
+        values = embeddings["data"][ptr_start:ptr_end]
+        ret.append((doc_id, tokens, values))
+    return ret
+
+
+
 
 def ir_datasets_from_tira(force_reload=False):
     global _IR_DATASETS_FROM_TIRA
@@ -104,7 +133,11 @@ class LsrBenchmarkQueries(BaseQueries):
         self.__irds_id = ir_datasets_id
 
     def queries_iter(self):
-        queries_file = extracted_resource(self.__irds_id, "truths") / self.__queries_name
+        if os.path.isfile(self.__queries_name):
+            queries_file = Path(self.__queries_name)
+        else:
+            queries_file = extracted_resource(self.__irds_id, "truths") / self.__queries_name
+
         for l in QueryProcessorFormat().all_lines(queries_file):
             yield GenericQuery(l["qid"], l["query"])
 
@@ -120,7 +153,7 @@ class LsrBenchmarkDocuments(BaseDocs):
         self.__docs = None
         self.__irds_id = irds_id
 
-    def docs_iter(self, embedding=None, passage_aggregation=None):
+    def docs_iter(self):
         for l in self.docs():
             yield LsrBenchmarkDocument._from_json(l)
 
@@ -158,7 +191,10 @@ class LsrBenchmarkDataset(Dataset):
         if qrels is not None:
             class QrelsObj:
                 def stream(self):
-                    qrels_file = extracted_resource(ir_datasets_id, "truths") / qrels
+                    if os.path.isfile(qrels):
+                        qrels_file = Path(qrels)
+                    else:
+                        qrels_file = extracted_resource(ir_datasets_id, "truths") / qrels
                     return qrels_file.open("rb")
 
             qrels_obj = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
@@ -171,31 +207,11 @@ class LsrBenchmarkDataset(Dataset):
         super().__init__(docs, queries, qrels_obj, documentation)
         self.metadata = MetadataComponent(ir_datasets_id, self)
 
-    def embeddings(
-        self, model_name: str, passage_aggregation: str, text_type: str
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
-        embedding_dir = extracted_resource(self.__irds_id, model_name) / text_type
-        embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
-        ids = (embedding_dir / f"{text_type}-ids.txt").read_text().strip().split("\n")
-        return embeddings["data"], embeddings["indices"], embeddings["indptr"], ids
+    def query_embeddings(self, model_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        return embeddings(self.__irds_id, model_name, "query")
 
-    def query_embeddings(
-        self, model_name: str, passage_aggregation: str
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
-        ### hardcoded for now
-        model_name = "splade-v3-non-segmented"
-        ###
-
-        return self.embeddings(model_name, passage_aggregation, "query")
-
-    def doc_embeddings(
-        self, model_name: str, passage_aggregation: str
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
-        ### hardcoded for now
-        model_name = "splade-v3-non-segmented"
-        ###
-
-        return self.embeddings(model_name, passage_aggregation, "doc")
+    def doc_embeddings(self, model_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        return embeddings(self.__irds_id, model_name, "doc")
 
 
 def extract_zip(zip_file: Path, target_directory: Path):
@@ -211,25 +227,26 @@ def extract_zip(zip_file: Path, target_directory: Path):
 
 
 def build_dataset(ir_datasets_id: str, segmented: bool):
-    if ir_datasets_id in ir_datasets_from_tira():
+    try:
+        from tirex_tracker import register_metadata
+        register_metadata({"data": {"test collection": {"name": ir_datasets_id}}})
+    except:
+        pass
+
+    if ir_datasets_id in ir_datasets_from_tira(True):
         from tira.rest_api_client import Client
-        from tira.third_party_integrations import temporary_directory
-        from os import symlink
-        target_dir = temporary_directory()
+
         tira = Client()
         system_inputs = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=False)
         truths = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=True)
 
-        # TODO this is ugly hacked
-        symlink(system_inputs / "corpus.jsonl.gz", target_dir / "corpus.jsonl.gz")
-        symlink(system_inputs / "queries.jsonl", target_dir / "queries.jsonl")
-        symlink(truths / "qrels.txt", target_dir / "qrels.txt")
-
-        ir_datasets_id = str(target_dir)
-
-    docs = "corpus.jsonl.gz"
-    queries = "queries.jsonl"
-    qrels = "qrels.txt"
+        docs = system_inputs / "corpus.jsonl.gz"
+        queries = system_inputs / "queries.jsonl"
+        qrels = truths / "qrels.txt"
+    else:
+        docs = "corpus.jsonl.gz"
+        queries = "queries.jsonl"
+        qrels = "qrels.txt"
 
     return LsrBenchmarkDataset(
         ir_datasets_id=ir_datasets_id,

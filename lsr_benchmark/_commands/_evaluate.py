@@ -7,6 +7,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import TYPE_CHECKING, Mapping, Dict, Any
 from zipfile import ZipFile
+import gzip
 
 import click
 import ir_measures
@@ -63,11 +64,11 @@ def __read_metrics(name: str) -> "tuple[dict[str, Metadata], list[ScoredDoc]]":
 
     if Path(name).is_dir():
         for m in glob(f"{name}/*-metadata.y*ml"):
-            metadata[m.split("-")[0].split("/")[-1]] = yaml.safe_load(Path(m).read_text())
+            metadata[m.split("/")[-1].split("-")[0]] = yaml.safe_load(Path(m).read_text())
         if (Path(name) / "run.txt").is_file():
             run = list(ir_measures.read_trec_run((Path(name) / "run.txt").read_text()))
         else:
-            run = list(ir_measures.read_trec_run(Path(name) / "run.txt.gz"))
+            run = list(ir_measures.read_trec_run(gzip.open(Path(name) / "run.txt.gz", "rt")))
     else:
         with ZipFile(name) as archive:
             for entry in archive.filelist:
@@ -148,7 +149,7 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
 def __get_dataset_name(metadata: Dict[str, Any]) -> str:
     candidates = set()
 
-    for m in metadata.values():
+    for k, m in metadata.items():
         if "data" in m and "test collection" in m["data"] and "name" in m["data"]["test collection"] and m["data"]["test collection"]["name"]:
             candidates.add(m["data"]["test collection"]["name"])
 
