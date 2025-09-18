@@ -159,7 +159,7 @@ class LsrBenchmarkDocuments(BaseDocs):
 
     def docs(self):
         if not self.__docs:
-            if os.path.is_file(self.__corpus_file):
+            if os.path.isfile(self.__corpus_file):
                 docs_file = Path(self.__corpus_file)
             else:
                 docs_file = extracted_resource(self.__irds_id, "inputs") / self.__corpus_file
