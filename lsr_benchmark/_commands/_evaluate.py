@@ -226,6 +226,7 @@ def evaluate(approaches: list[str], measure: list[str], out: str, upload: bool) 
         irmeasures = set(m for _, t, m in measure if t == 'ir_measure')
 
         dataset = __get_dataset_name(metadata)
+        lsr_benchmark.register_to_ir_datasets(dataset)
         dset = lsr_benchmark.load(dataset)
         assert dset.has_qrels()
 

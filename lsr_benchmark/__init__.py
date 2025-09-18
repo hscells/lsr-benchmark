@@ -20,7 +20,7 @@ def register_to_ir_datasets(dataset=None):
             ds = build_dataset(dataset, False)
             registry.register(dataset, ds)
             registry.register("lsr-benchmark/" + dataset, ds)
-    elif dataset and dataset in ir_datasets_from_tira():
+    elif dataset and (dataset in ir_datasets_from_tira() or dataset in ir_datasets_from_tira(True)):
         if dataset not in registry:
             ds = build_dataset(dataset, False)
 
