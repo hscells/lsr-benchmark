@@ -53,8 +53,28 @@ Result:
 
 ## Step 3: Upload the Dataset
 
-Accessing data (in progress)
+Assuming you have materialized your corpus as above and you are authenticated against the TIRA backend as admin of the task, you can upload the dataset via:
 
+```
+tira-cli dataset-submission --path YOUR-DIRECTORY --task lsr-benchmark --split train
+```
 
-tira-cli upload --dataset trec-web-2009-20250605-test --directory trec-18-web/truths-extracted/ --system truths
+This will check that the system-inputs and the truths are valid, it will run a baseline on it, will check that the outputs of the basline are valid and will run the evaluation on the baseline to ensure that everything works. If so, it will upload it to TIRA. All of this is configured in the README.md of the dataset directory in the Hugging Face datasets format.
+
+If everything worked, the output should look like:
+
+```
+TIRA Dataset Submission:
+✓ Your tira installation is valid.
+✓ The configuration of the dataset YOUR-DIRECTORY is valid.
+✓ The system inputs are valid.
+✓ The truth data is valid.
+✓ Repository for the baseline is cloned from https://github.com/reneuir/lsr-benchmark.
+✓ The baseline step-03-retrieval-approaches/pyterrier-naive is embedded in a Docker image.
+✓ The evaluation of the baseline produced valid outputs: {'nDCG@10': 0.9077324383928644, 'P@10': 0.1}.
+✓ Configuration for dataset learned-sparse-retrieval-20250919-training is uploaded to TIRA.
+✓ inputs are uploaded to TIRA: Uploaded files ['corpus.jsonl.gz', 'queries.jsonl'] to dataset learned-sparse-retrieval-20250919-training. md5sum=d9853bbcec434be1db7410a3d8e3049e
+✓ truths are uploaded to TIRA: Uploaded files ['qrels.txt', 'queries.jsonl'] to dataset learned-sparse-retrieval-20250919-training. md5sum=7a30c3370b098039b5439cbed60f16ce
+```
+
 
