@@ -109,7 +109,7 @@ Navigate to your run in the UI and unblind and publish it so that the embeddings
 
 ## Step 5: Run a bunch of Retrieval Approaches
 
-Now we can run retrieval systems. For instance, those in the [step-03-retrieval-approaches](../step-03-retrieval-approaches] directory.
+Now we can run retrieval systems. For instance, those in the [step-03-retrieval-approaches](../step-03-retrieval-approaches) directory.
 
 ## Step 6: Evaluation
 
