@@ -77,4 +77,32 @@ TIRA Dataset Submission:
 ✓ truths are uploaded to TIRA: Uploaded files ['qrels.txt', 'queries.jsonl'] to dataset learned-sparse-retrieval-20250919-training. md5sum=7a30c3370b098039b5439cbed60f16ce
 ```
 
+## Step 4: Run a bunch of Embedding Approaches on the Dataset
 
+As soon as everything is properly dockerized and data formats for embeddings are final, we will run the dockerized versions of all embedding approaches on TIRA. While this might change, we run the embeddings locally and upload them.
+
+E.g., in the [step-02-embedding-approaches](../step-02-embedding-approaches) directory, run:
+
+```
+/lightning-ir.py --dataset YOUR-DATASET-ID --model SOME-MODEL --save_dir OUTPUT-DIRECTORY
+```
+
+If the output worked, you can upload the embeddings to TIRA via:
+
+```
+tira-cli upload --directory YOUR-DIRECTORY
+```
+
+If everything worked, the output will look like:
+
+```
+I check that the submission in directory 'example-outputs/' is valid...
+	✓ Valid lightning-ir embeddings found.
+Upload example-outputs to TIRA: 100%|████████████████████████████████████████████████████████████████████████| 21.3k/21.3k [00:00<00:00, 83.3kB/s]
+	✓ The data is uploaded.
+I upload the metadata for the submission...
+	✓ Done. Your run is available as SUBMISSION NAME at:
+	https://www.tira.io/submit/task_1/user/YOUR-TEAM/upload-submission
+```
+
+Navigate to your run in the UI and unblind and publish it so that the embeddings can be downloaded by others.
