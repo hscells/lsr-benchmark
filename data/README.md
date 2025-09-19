@@ -106,3 +106,33 @@ I upload the metadata for the submission...
 ```
 
 Navigate to your run in the UI and unblind and publish it so that the embeddings can be downloaded by others.
+
+## Step 5: Run a bunch of Retrieval Approaches
+
+Now we can run retrieval systems. For instance, those in the [step-03-retrieval-approaches](../step-03-retrieval-approaches] directory.
+
+## Step 6: Evaluation
+
+Assumed you have retrieval runs run-01, run-02, and run-03, you can run:
+
+```
+lsr-benchmark evaluate run-0*
+```
+
+The evaluation aims to evaluate efficiency and effectiveness, and can look like this (run-03 was a baseline that does not use embeddings, run-01 has a super tiny depth):
+
+```
+                             run-01    run-02    run-03
+doc.runtime_wallclock        234 ms    234 ms       NaN
+doc.energy_total                2.0       2.0       NaN
+index.runtime_wallclock        6 ms      6 ms    172 ms
+index.energy_total              0.0       0.0       0.0
+retrieval.runtime_wallclock    0 ms      0 ms     66 ms
+retrieval.energy_total          0.0       0.0       0.0
+query.runtime_wallclock      685 ms    685 ms       NaN
+query.energy_total              4.0       4.0       NaN
+P@5                             0.0       0.1       0.2
+nDCG@10                         0.0  0.361344  0.907732
+AP@100                          0.0  0.172917     0.875
+```
+
