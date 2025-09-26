@@ -15,3 +15,7 @@ To make predictions on a dataset, run:
 ```
 ./run-pyterrier.py --dataset clueweb09/en/trec-web-2009 --retrieval BM25 --output output-dir
 ```
+
+cat /sys/class/powercap/intel-rapl/*/energy_uj
+
+rm -Rf ~/.tira; mkdir ~/.tira; echo '{"archive_base_url": "https://127.0.0.1:8080/", "base_url": "https://127.0.0.1:8080/", "base_url_api": "https://127.0.0.1:8080/", "verify": 0}' > ~/.tira/.tira-settings.json
