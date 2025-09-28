@@ -7,6 +7,7 @@ from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
 from tira.check_format import JsonlFormat, QueryProcessorFormat
+from tqdm import tqdm
 import os
 from glob import glob
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
 MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
-TIRA_LSR_TASK_ID = "task_1"
+TIRA_LSR_TASK_ID = "lsr-benchmark"
 
 
 DOWNLOAD_CONTENTS = {
@@ -48,7 +49,10 @@ def embeddings(
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
     from tira.rest_api_client import Client
     tira = Client()
-    embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/maik-lsr/{model_name}", dataset_id) / text_type
+    team_and_model = model_name.split('/')
+    team_name = team_and_model[0]
+    model_name = '-'.join(team_and_model[1:])
+    embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
     embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
 
     try:
@@ -67,8 +71,6 @@ def embeddings(
         values = embeddings["data"][ptr_start:ptr_end]
         ret.append((doc_id, tokens, values))
     return ret
-
-
 
 
 def ir_datasets_from_tira(force_reload=False):
