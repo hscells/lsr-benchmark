@@ -58,17 +58,21 @@ def embeddings(
     try:
         from tirex_tracker import register_file
         for i in glob(f"{embedding_dir}/*.yml") + glob(f"{embedding_dir}/*.yaml"):
-            register_file(embedding_dir, i.split("/")[-1])
+            register_file(embedding_dir, i.split("/")[-1], subdirectory=".embedding")
     except:
         pass
 
     ids = (embedding_dir / f"{text_type}-ids.txt").read_text().strip().split("\n")
 
     ret = []
+    indices = embeddings["indices"].astype("U30")
+    data = embeddings["data"]
+
     ptr_start = 0
-    for doc_id, ptr_end in zip(ids, embeddings["indptr"][1:]):
-        tokens = embeddings["indices"][ptr_start:ptr_end].astype("U30")
-        values = embeddings["data"][ptr_start:ptr_end]
+    for doc_id, ptr_end in tqdm(list(zip(ids, embeddings["indptr"][1:])), "load doc embeddings"):
+        tokens = indices[ptr_start:ptr_end]
+        values = data[ptr_start:ptr_end]
+        ptr_start = ptr_end
         ret.append((doc_id, tokens, values))
     return ret
 

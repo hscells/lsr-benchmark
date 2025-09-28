@@ -13,6 +13,7 @@ import click
 import ir_measures
 import pandas as pd
 import yaml
+from tira.check_format import lines_if_valid
 from ir_measures import parse_trec_measure
 
 import lsr_benchmark
@@ -63,8 +64,8 @@ def __read_metrics(name: str) -> "tuple[dict[str, Metadata], list[ScoredDoc]]":
     metadata: "dict[str, Metadata]" = {}
 
     if Path(name).is_dir():
-        for m in glob(f"{name}/*-metadata.y*ml"):
-            metadata[m.split("/")[-1].split("-")[0]] = yaml.safe_load(Path(m).read_text())
+        for l in lines_if_valid(Path(name), "ir_metadata"):
+            metadata[l['name'].replace('.', '').split("-")[0]] = l['content']
         if (Path(name) / "run.txt").is_file():
             run = list(ir_measures.read_trec_run((Path(name) / "run.txt").read_text()))
         else:
