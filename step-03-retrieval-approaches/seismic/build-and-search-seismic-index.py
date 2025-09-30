@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 import ir_datasets
 import lsr_benchmark
-import numpy as np
 import click
-import seismic
 from seismic import SeismicIndex, SeismicDataset
 from tqdm import tqdm
-from tirex_tracker import tracking, ExportFormat
+from tirex_tracker import tracking, ExportFormat, register_metadata
 from shutil import rmtree
 from pathlib import Path
 from lsr_benchmark.utils import ClickParamTypeLsrDataset
@@ -14,12 +12,7 @@ import gzip
 
 
 @click.command()
-@click.option(
-    "--dataset",
-    type=ClickParamTypeLsrDataset(),
-    required=True,
-    help="The dataset id or a local directory.",
-)
+@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
 )
 @click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
@@ -31,12 +24,12 @@ def main(dataset, embedding, output, heap_factor, query_cut, k):
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
     seismic_dataset = SeismicDataset()
-
-    for (doc_id, tokens, values) in ir_dataset.doc_embeddings(model_name=embedding):
+    register_metadata({"actor": {"team": "reneuir-baselines"}, "tag": f"seismic-{embedding.replace('/', '-')}-{heap_factor}-{query_cut}-{k}"})
+    for (doc_id, tokens, values) in tqdm(ir_dataset.doc_embeddings(model_name=embedding), "create seismic dataset"):
         seismic_dataset.add_document(doc_id, tokens, values)
 
     print("Documents added to the SeismicDataset. Now indexing..")
-    with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA):
+    with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA, ):
         index = SeismicIndex.build_from_dataset(seismic_dataset)
 
     query_embeddings = ir_dataset.query_embeddings(model_name=embedding)

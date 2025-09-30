@@ -1,6 +1,6 @@
 git+https://github.com/reneuir/lsr-benchmark.git
-tirex-tracker
+tirex-tracker>=0.2.16
+tira>=0.0.180
 pyseismic-lsr
 click
-torch
 maturin
