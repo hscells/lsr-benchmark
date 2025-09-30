@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 from pathlib import Path
-
 import click
 import numpy as np
 import torch
 from lightning_ir import BiEncoderModule, DocDataset, LightningIRDataModule, LightningIRTrainer, QueryDataset
-from tirex_tracker import tracking
+from tirex_tracker import tracking, register_metadata
 from lsr_benchmark.utils import ClickParamTypeLsrDataset
-
 import lsr_benchmark
 
 
@@ -19,12 +17,7 @@ def convert_embeddings(embeddings: torch.Tensor):
 
 
 @click.command()
-@click.option(
-    "--dataset",
-    type=ClickParamTypeLsrDataset(),
-    required=True,
-    help="The dataset id or a local directory.",
-)
+@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--model", type=str, required=True, help="The lightning ir model.")
 @click.option("--batch_size", type=int, default=4, help="Number of queries/documents to process in a batch.")
 @click.option("--save_dir", type=Path, required=True, help="Directory to save output embeddings.")
@@ -39,6 +32,7 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     dataset_id = f"lsr-benchmark/{dataset}"
 
     trainer = LightningIRTrainer(logger=False)
+    register_metadata({"actor": {"team": "lightning-ir"}, "tag": model.replace('/', '-')})
 
     # embed queries and documents
     for text_type, Dataset in zip(["query", "doc"], [QueryDataset, DocDataset]):
