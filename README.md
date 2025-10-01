@@ -68,16 +68,16 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 
 # Pre-computed Embeddings
 
-- [ ] [webis/splade](https://huggingface.co/webis/splade)
-- [ ] [naver/splade-v3](https://huggingface.co/naver/splade-v3)
-- [ ] [naver/splade-v3-distilbert](https://huggingface.co/naver/splade-v3-distilbert)
-- [ ] [naver/splade_v2_distil](https://huggingface.co/naver/splade_v2_distil)
-- [ ] [naver/efficient-splade-VI-BT-large-doc](https://huggingface.co/naver/efficient-splade-VI-BT-large-doc)
-- [ ] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical)
-- [ ] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc)
-- [ ] [castorini/unicoil-msmarco-passage](https://huggingface.co/castorini/unicoil-msmarco-passage)
-- [ ] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill)
-- [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)
+- [ ] [webis/splade](https://huggingface.co/webis/splade): Ferdi
+- [ ] [naver/splade-v3](https://huggingface.co/naver/splade-v3): Ferdi
+- [ ] [naver/splade-v3-distilbert](https://huggingface.co/naver/splade-v3-distilbert): Ferdi
+- [ ] [naver/splade_v2_distil](https://huggingface.co/naver/splade_v2_distil): Ferdi
+- [ ] [naver/efficient-splade-VI-BT-large-doc](https://huggingface.co/naver/efficient-splade-VI-BT-large-doc): Ferdi
+- [ ] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical): Ferdi
+- [ ] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc): Ferdi
+- [ ] [castorini/unicoil-msmarco-passage](https://huggingface.co/castorini/unicoil-msmarco-passage): Ferdi
+- [ ] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill): Ferdi
+- [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3): Carlos
 
 # Remaining Retrieval Engines
 
