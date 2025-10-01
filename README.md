@@ -91,7 +91,7 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [ ] anserini: Carlos
 - [x] pyterrier: Maik
 - [ ] (pyterrier_)pisa: Maik
-- [ ] konolo: Cosimo
+- [ ] kANNolo: Cosimo
 
 # Installation
 
