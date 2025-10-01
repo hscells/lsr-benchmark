@@ -76,6 +76,18 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [ ] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical)
 - [ ] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc)
 - [ ] [castorini/unicoil-msmarco-passage](https://huggingface.co/castorini/unicoil-msmarco-passage)
+- [ ] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill)
+- [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)
+
+# Remaining Retrieval Engines
+
+- [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
+- [ ] pytorch sparse naive implementation: Ferdi
+- [ ] Naive with dictionaries or with rust: Cosimo
+- [ ] anserini: Carlos
+- [x] pyterrier: Maik
+- [ ] (pyterrier_)pisa: Maik
+- [ ] konolo: Cosimo
 
 # Installation
 
