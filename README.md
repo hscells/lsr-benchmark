@@ -66,6 +66,17 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 | ... ||||
 
 
+# Pre-computed Embeddings
+
+- [ ] [webis/splade](https://huggingface.co/webis/splade)
+- [ ] [naver/splade-v3](https://huggingface.co/naver/splade-v3)
+- [ ] [naver/splade-v3-distilbert](https://huggingface.co/naver/splade-v3-distilbert)
+- [ ] [naver/splade_v2_distil](https://huggingface.co/naver/splade_v2_distil)
+- [ ] [naver/efficient-splade-VI-BT-large-doc](https://huggingface.co/naver/efficient-splade-VI-BT-large-doc)
+- [ ] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical)
+- [ ] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc)
+- [ ] [castorini/unicoil-msmarco-passage](https://huggingface.co/castorini/unicoil-msmarco-passage)
+
 # Installation
 
 To install the lsr-benchmark for development purposes, please clone the repository and then run:
