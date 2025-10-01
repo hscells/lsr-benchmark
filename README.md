@@ -65,6 +65,10 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 |TREC DL 23 (Document)||||
 | ... ||||
 
+# ToDo: Documentation
+
+- Maik: Write how to add new datasets, embeddings, retrieval, evaluation
+  - short video
 
 # Pre-computed Embeddings
 
