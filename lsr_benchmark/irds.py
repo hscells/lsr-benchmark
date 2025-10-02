@@ -7,6 +7,7 @@ from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
 from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
 from tira.check_format import JsonlFormat, QueryProcessorFormat
+from tira.third_party_integrations import in_tira_sandbox
 from tqdm import tqdm
 import os
 from glob import glob
@@ -79,6 +80,10 @@ def embeddings(
 
 def ir_datasets_from_tira(force_reload=False):
     global _IR_DATASETS_FROM_TIRA
+    
+    if in_tira_sandbox():
+        return []
+    
     if _IR_DATASETS_FROM_TIRA is None or force_reload:
         from tira.rest_api_client import Client
         tira = Client()
