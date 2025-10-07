@@ -1,4 +1,5 @@
+git+https://github.com/reneuir/lsr-benchmark.git
 git+https://github.com/webis-de/lightning-ir.git
+click
 tirex-tracker>=0.2.16
 tira>=0.0.182
-click
