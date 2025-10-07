@@ -8,7 +8,7 @@ tira-cli code-submission \
     --tira-vm-id lightning-ir \
     --dataset tiny-example-20251001-training \
     --command '/lightning-ir.py --dataset $inputDataset --save_dir $outputDir --model naver/splade-v3' \
-    --mount-hf-model naver/splade-v \
+    --mount-hf-model naver/splade-v3 \
     --dry-run
 ```
 
