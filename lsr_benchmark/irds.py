@@ -69,10 +69,10 @@ def ir_datasets_from_tira(force_reload=False):
 
 
 def extracted_resource(irds_id: str, f) -> Path:
-    if os.path.isdir(irds_id) and not irds_id in DOWNLOAD_CONTENTS:
+    if os.path.isdir(irds_id):
         return Path(irds_id)
     else:
-        return extracted_resource_from_remote(irds_id, f)
+        raise ValueError("ToDo: finish refactoring")
 
 
 class Segment(NamedTuple):
