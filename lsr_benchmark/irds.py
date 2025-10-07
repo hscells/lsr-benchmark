@@ -5,7 +5,7 @@ from typing import List, NamedTuple, TYPE_CHECKING
 import numpy as np
 from ir_datasets.datasets.base import Dataset
 from ir_datasets.formats import BaseDocs, BaseQueries, GenericQuery, TrecQrels
-from ir_datasets.util import MetadataComponent, _DownloadConfig, home_path
+from ir_datasets.util import MetadataComponent
 from tira.check_format import JsonlFormat, QueryProcessorFormat
 from tira.third_party_integrations import in_tira_sandbox
 from tqdm import tqdm
@@ -17,30 +17,6 @@ if TYPE_CHECKING:
 
 MAPPING_OF_DATASET_IDS = {"clueweb09/en/trec-web-2009": "data/trec-18-web"}
 TIRA_LSR_TASK_ID = "lsr-benchmark"
-
-
-DOWNLOAD_CONTENTS = {
-    "clueweb09/en/trec-web-2009": {
-        "inputs": {
-            "url": "https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/inputs.zip",
-            "expected_md5": "75a107e4c545a5d79c77942b5e863a16",
-            "size_hint": 421574669,
-            "cache_path": "trec-web-2009-inputs.zip",
-        },
-        "truths": {
-            "url": "https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/truths.zip",
-            "expected_md5": "f28e36759760c9520e7831aba86c4d23",
-            "size_hint": 502691,
-            "cache_path": "trec-web-2009-truths.zip",
-        },
-        "splade-v3-non-segmented": {
-            "url": "https://files.webis.de/data-in-progress/lsr-benchmark-delete-me-after-01-08-2025/splade-v3-non-segmented.zip",
-            "expected_md5": "fb05608785506a8047ba4a1e1fdee9f4",
-            "size_hint": 127198049,
-            "cache_path": "trec-web-2009-splade-v3-non-segmented.zip",
-        },
-    }
-}
 
 
 _IR_DATASETS_FROM_TIRA = None
@@ -91,19 +67,12 @@ def ir_datasets_from_tira(force_reload=False):
 
     return _IR_DATASETS_FROM_TIRA
 
-DownloadConfig = _DownloadConfig(contents=DOWNLOAD_CONTENTS)
 
 def extracted_resource(irds_id: str, f) -> Path:
     if os.path.isdir(irds_id) and not irds_id in DOWNLOAD_CONTENTS:
         return Path(irds_id)
     else:
         return extracted_resource_from_remote(irds_id, f)
-
-def extracted_resource_from_remote(irds_id: str, f) -> Path:
-    zip_file = DownloadConfig.context(irds_id, home_path() / "lsr-benchmark" / irds_id.replace("/", "-"))[f].path()
-    target_dir = Path(str(zip_file).replace(".zip", "") + "-extracted")
-    extract_zip(zip_file, target_dir)
-    return target_dir
 
 
 class Segment(NamedTuple):
@@ -147,7 +116,7 @@ class LsrBenchmarkQueries(BaseQueries):
         if os.path.isfile(self.__queries_name):
             queries_file = Path(self.__queries_name)
         else:
-            queries_file = extracted_resource(self.__irds_id, "truths") / self.__queries_name
+            queries_file = extracted_resource(self.__irds_id, "inputs") / self.__queries_name
 
         for l in QueryProcessorFormat().all_lines(queries_file):
             yield GenericQuery(l["qid"], l["query"])
@@ -252,11 +221,14 @@ def build_dataset(ir_datasets_id: str, segmented: bool):
 
         tira = Client()
         system_inputs = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=False)
-        truths = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=True)
 
         docs = system_inputs / "corpus.jsonl.gz"
         queries = system_inputs / "queries.jsonl"
-        qrels = truths / "qrels.txt"
+        qrels = None
+
+        if not in_tira_sandbox():
+            truths = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=True)
+            qrels = truths / "qrels.txt"
     else:
         docs = "corpus.jsonl.gz"
         queries = "queries.jsonl"
