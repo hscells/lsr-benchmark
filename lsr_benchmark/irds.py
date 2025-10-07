@@ -171,7 +171,9 @@ class LsrBenchmarkDataset(Dataset):
         if queries:
             queries = LsrBenchmarkQueries(queries, ir_datasets_id)
 
-        if qrels is not None:
+        if qrels is None:
+            qrels_obj = None
+        else:
             class QrelsObj:
                 def stream(self):
                     if os.path.isfile(qrels):
