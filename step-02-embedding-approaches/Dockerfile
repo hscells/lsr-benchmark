@@ -1,9 +1,4 @@
-FROM nvcr.io/nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04
-
-RUN set -x \
-    && apt update \
-    && apt install -y git python3 python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+FROM pytorch/pytorch:2.8.0-cuda12.9-cudnn9-runtime
 
 ADD requirements.txt /tmp/
 
