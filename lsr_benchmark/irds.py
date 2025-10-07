@@ -232,7 +232,7 @@ def build_dataset(ir_datasets_id: str, segmented: bool):
     else:
         docs = "corpus.jsonl.gz"
         queries = "queries.jsonl"
-        qrels = "qrels.txt"
+        qrels = "qrels.txt" if not not in_tira_sandbox() else None
 
     return LsrBenchmarkDataset(
         ir_datasets_id=ir_datasets_id,
