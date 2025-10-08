@@ -3,6 +3,17 @@
 This is a naive baseline for the lsr-benchmark that aims to fulfull the input/output contract while actually not doing any LSR at all. The idea is that this can be used as a baseline that has no dependencies to embeddings to test pipelines without much dependencies.
 
 
+## Submission
+
+```
+tira-cli code-submission \
+    --path . \
+    --task lsr-benchmark \
+    --tira-vm-id reneuir-baselines \
+    --dataset tiny-example-20251002_0-training \
+    --command '/run-pyterrier.py --dataset $inputDataset --output $outputDir --retrieval BM25' \
+    --dry-run
+```
 
 ## Development
 
