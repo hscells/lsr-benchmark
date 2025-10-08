@@ -63,6 +63,9 @@ def __get_nested_or_default(d: "Mapping[_KT, Union[dict, _VT]]", keys: "list[_KT
 def __read_metrics(name: str) -> "tuple[dict[str, Metadata], list[ScoredDoc]]":
     metadata: "dict[str, Metadata]" = {}
 
+    if name.endswith('/run.txt.gz'):
+        name = name.replace('/run.txt.gz', '/')
+
     if Path(name).is_dir():
         for l in lines_if_valid(Path(name), "ir_metadata"):
             metadata[l['name'].replace('.', '').split("-")[0]] = l['content']
@@ -154,6 +157,7 @@ def __get_dataset_name(metadata: Dict[str, Any]) -> str:
         if "data" in m and "test collection" in m["data"] and "name" in m["data"]["test collection"] and m["data"]["test collection"]["name"]:
             candidates.add(m["data"]["test collection"]["name"])
 
+    candidates = [i for i in candidates if i != '/tira-data/input']
     if len(candidates) != 1:
         raise ValueError(f"I can not extract the dataset from the metadata. I found candidates: {list(candidates)}")
 
@@ -177,6 +181,30 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
         return routine
     else:
         raise ValueError(f"The suffix of {specifier} is not known.")
+
+
+def evaluate_approach(approach: str, measure: list[str]):
+    ret = {}
+    metadata, run = __read_metrics(approach)
+    for group, meta in metadata.items():
+        for name, typ, func in measure:
+            if typ == 'tirex':
+                if (val := func(meta)) is not None:
+                    ret[f"{group}.{name}"] = val
+                else:
+                    ret[f"{group}.{name}"] = None
+                    logging.warning(
+                        f"Measure {name} could not be reported for {approach}.{group} as its metadata is not present")
+    # Update with ir_measures effectiveness measures
+    irmeasures = set(m for _, t, m in measure if t == 'ir_measure')
+
+    dataset = __get_dataset_name(metadata)
+    lsr_benchmark.register_to_ir_datasets(dataset)
+    dset = lsr_benchmark.load(dataset)
+    assert dset.has_qrels()
+
+    ret.update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
+    return ret
 
 
 @click.argument(
@@ -214,25 +242,7 @@ def evaluate(approaches: list[str], measure: list[str], out: str, upload: bool) 
 
     scores: dict[str, dict[str, float]] = defaultdict(dict)
     for approach in approaches:
-        metadata, run = __read_metrics(approach)
-        for group, meta in metadata.items():
-            for name, typ, func in measure:
-                if typ == 'tirex':
-                    if (val := func(meta)) is not None:
-                        scores[approach][f"{group}.{name}"] = val
-                    else:
-                        scores[approach][f"{group}.{name}"] = None
-                        logging.warning(
-                            f"Measure {name} could not be reported for {approach}.{group} as its metadata is not present")
-        # Update with ir_measures effectiveness measures
-        irmeasures = set(m for _, t, m in measure if t == 'ir_measure')
-
-        dataset = __get_dataset_name(metadata)
-        lsr_benchmark.register_to_ir_datasets(dataset)
-        dset = lsr_benchmark.load(dataset)
-        assert dset.has_qrels()
-
-        scores[approach].update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
+        scores[approach] = evaluate_approach(approach, measure)
 
         if upload:
             from tira.tira_cli import upload_command
