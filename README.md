@@ -79,6 +79,7 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [x] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical): Ferdi
 - [x] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc): Ferdi
 - [x] [castorini/unicoil-noexp-msmarco-passage](https://huggingface.co/castorini/unicoil-noexp-msmarco-passage): Ferdi
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-v2-distill): Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill): Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini) Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill) Ferdi
