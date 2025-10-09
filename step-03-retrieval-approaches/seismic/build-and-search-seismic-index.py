@@ -11,14 +11,16 @@ from lsr_benchmark.utils import ClickParamTypeLsrDataset
 import gzip
 
 
+
+
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
 )
 @click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
 @click.option("--heap-factor", type=float, required=False, default=0.8, help="TBD.")
-@click.option("--query-cut", type=int, required=False, default=10, help="TBD.")
-@click.option("--k", type=int, required=False, default=10, help="TBD.")
+@click.option("--query-cut", type=int, required=False, default=10, help="Number of posting lists to explore when searching for candidates.")
+@click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
 def main(dataset, embedding, output, heap_factor, query_cut, k):
     output.mkdir(parents=True)
     lsr_benchmark.register_to_ir_datasets(dataset)

@@ -7,5 +7,5 @@ If you want to run it locally, please install the dependencies via `pip3 install
 To make predictions on a dataset, run:
 
 ```
-./build-and-search-seismic-index.py --dataset lsr-benchmark/clueweb09/en/trec-web-2009 --embedding naver/splade-v3 --passage-aggregation first-passage --output output-dir
+./build-and-search-seismic-index.py --dataset lsr-benchmark/clueweb09/en/trec-web-2009 --embedding naver/splade-v3 --output output-dir
 ```
