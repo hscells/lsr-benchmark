@@ -65,28 +65,30 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 
 # Pre-computed Embeddings
 
-- [x] [webis/splade](https://huggingface.co/webis/splade): Ferdi
-- [x] [naver/splade-v3](https://huggingface.co/naver/splade-v3): Ferdi
-- [x] [naver/splade-v3-distilbert](https://huggingface.co/naver/splade-v3-distilbert): Ferdi
-- [x] [naver/splade_v2_distil](https://huggingface.co/naver/splade_v2_distil): Ferdi
-- [x] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical): Ferdi
-- [x] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc): Ferdi
-- [x] [castorini/unicoil-noexp-msmarco-passage](https://huggingface.co/castorini/unicoil-noexp-msmarco-passage): Ferdi
-- [x] [opensearch-project/opensearch-neural-sparse-encoding-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-v2-distill): Ferdi
-- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill): Ferdi
-- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini) Ferdi
-- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill) Ferdi
-- [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3): Carlos
+- [x] [webis/splade](https://huggingface.co/webis/splade)
+- [x] [naver/splade-v3](https://huggingface.co/naver/splade-v3)
+- [x] [naver/splade-v3-distilbert](https://huggingface.co/naver/splade-v3-distilbert)
+- [x] [naver/splade_v2_distil](https://huggingface.co/naver/splade_v2_distil)
+- [x] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical)
+- [x] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc)
+- [x] [castorini/unicoil-noexp-msmarco-passage](https://huggingface.co/castorini/unicoil-noexp-msmarco-passage)
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-v2-distill)
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill)
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini)
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill)
+- [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)
 
 # Remaining Retrieval Engines
 
 - [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
+- [x] duckdb
 - [ ] pytorch sparse naive implementation: Ferdi
 - [ ] Naive with dictionaries or with rust: Cosimo
 - [ ] anserini: Carlos
-- [x] pyterrier: Maik
-- [ ] (pyterrier_)pisa: Maik
-- [ ] kANNolo: Cosimo
+- [x] pyterrier
+- [x] pyt_splade
+- [ ] pyt_splade_pisa: Maik
+- [x] kANNolo
 
 # Installation
 
