@@ -13,7 +13,7 @@ def load_docs(ir_datasets_id, subsample):
     skipped = 0
     for doc in tqdm(subsample):
         try:
-            ret[doc] = docs_store.get(doc).default_text()
+            ret[doc] = docs_store.get(doc).default_text()[:2000000]
         except:
             skipped += 1
     print(f"Skipped {skipped} docs")
