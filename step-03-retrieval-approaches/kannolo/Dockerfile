@@ -1,4 +1,4 @@
-# Take from the docker container of seismic. it does not seems to require any change. 
+# Taken from the docker container of seismic. it does not seems to require any change. 
 # docker build -t mam10eks/kannolo:0.0.1 .
 FROM ubuntu:22.04
 
