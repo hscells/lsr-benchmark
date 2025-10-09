@@ -33,6 +33,10 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 
 | Subsample | IRDS | Partitioned | Embedding |
 |-----------|----------|----------|-----------|
+|TREC RAG 24|OK|OK|OK|
+|TREC DL 19 (Passage)|OK|OK|OK|
+|TREC DL 20 (Passage)|OK|OK|OK|
+|Robust04|OK|OK|OK|
 |corpus-subsamples/clueweb09/en/trec-web-2009| OK | | |
 |corpus-subsamples/clueweb09/en/trec-web-2010| OK | | |
 |corpus-subsamples/clueweb09/en/trec-web-2011| OK | | |
@@ -40,30 +44,19 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 |corpus-subsamples/clueweb12/en/trec-web-2013| OK | | |
 |corpus-subsamples/clueweb12/en/trec-web-2014| OK | | |
 |corpus-subsamples/clueweb12/b13/trec-misinfo-2019| OK | | |
-|TREC RAG 24||||
-|TREC DL 19 (Passage)||||
-|TREC DL 20 (Passage)||||
-|TREC DL 21 (Passage)||||
-|TREC DL 23 (Passage)||||
-|TREC Covid||||
-|Robust04||||
-|TREC Precision Medicine|||
-|Argsme Touché 2020||||
-|Argsme Touché 2021||||
 |GOV Web track 2002||||
 |GOV Web track 2003||||
 |GOV Web track 2004||||
 |GOV2 TB track 2004||||
 |GOV2 TB track 2005||||
 |GOV2 TB track 2006||||
-|TREC-7||||
-|TREC-8||||
 |WaPo TREC Core 2018||||
-|TREC DL 19 (Document)||||
-|TREC DL 20 (Document)||||
-|TREC DL 21 (Document)||||
-|TREC DL 23 (Document)||||
-| ... ||||
+|TREC DL 23 (Passage)||||
+|Cranfield||||
+|Argsme Touché 2020||||
+
+- Potentially other datasets that we could add: TREC Covid, TREC DL 21 (Passage), TREC Precision Medicine, Argsme Touché 2021, TREC-7, TREC-8, TREC DL 19 (Document), TREC DL 20 (Document), TREC DL 21 (Document), TREC DL 23 (Document)
+
 
 # ToDo: Documentation
 
@@ -79,6 +72,7 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [x] [naver/splade-v3-lexical](https://huggingface.co/naver/splade-v3-lexical): Ferdi
 - [x] [naver/splade-v3-doc](https://huggingface.co/naver/splade-v3-doc): Ferdi
 - [x] [castorini/unicoil-noexp-msmarco-passage](https://huggingface.co/castorini/unicoil-noexp-msmarco-passage): Ferdi
+- [x] [opensearch-project/opensearch-neural-sparse-encoding-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-v2-distill): Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill): Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini) Ferdi
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill) Ferdi
