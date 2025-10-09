@@ -80,15 +80,16 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 
 # Remaining Retrieval Engines
 
-- [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
-- [x] duckdb
-- [ ] pytorch sparse naive implementation: Ferdi
-- [ ] Naive with dictionaries or with rust: Cosimo
 - [ ] anserini: Carlos
+- [x] duckdb
+- [x] kANNolo
+- [ ] naive with dictionaries or with rust: Cosimo
+- [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
 - [x] pyterrier
 - [x] pyt_splade
 - [ ] pyt_splade_pisa: Maik
-- [x] kANNolo
+- [ ] pytorch sparse naive implementation: Ferdi
+- [x] seismic
 
 # Installation
 
