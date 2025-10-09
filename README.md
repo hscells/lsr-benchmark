@@ -87,7 +87,7 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
 - [x] pyterrier
 - [x] pyt_splade
-- [ ] pyt_splade_pisa: Maik
+- [x] pyt_splade_pisa
 - [ ] pytorch sparse naive implementation: Ferdi
 - [x] seismic
 
