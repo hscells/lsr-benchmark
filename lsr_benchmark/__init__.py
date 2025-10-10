@@ -11,6 +11,7 @@ from tirex_tracker import tracking, ExportFormat
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
+from ._commands._retrieval import retrieval
 import os
 
 
@@ -102,6 +103,7 @@ def overview():
     print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset}\n\nEmbeddings:\n{df_embeddings}")
 
 main.command()(evaluate)
+main.command()(retrieval)
 
 if __name__ == '__main__':
     main()
