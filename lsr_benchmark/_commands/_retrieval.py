@@ -51,6 +51,9 @@ def all_embeddings():
             ret.add(embedding)
     return ret
 
+def all_datasets():
+    overview = json.loads((Path(__file__).parent.parent / "datasets" / "overview.json").read_text())
+    return overview.keys():
 
 @click.argument(
     "approaches",
@@ -80,6 +83,9 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
         for m, l in all_messages:
             log_message(m, l)
 
+    if dataset is none or not dataset:
+        dataset = 
+
     status = verify_tira_installation()
 
     if status != _fmt.OK:
@@ -107,12 +113,15 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
         for embedding in all_embeddings():
             for approach in approaches:
                 out_dir = Path(out) / d / embedding / approach
-                run_foo(approach_to_execution[approach]["tag"], approach_to_execution[approach]["command"], d, embedding, out_dir)
-                log_message(f"Approach {approach} finished on {d} for embedding {embedding}", _fmt.OK)
-                if approach not in stats:
-                    stats[approach] = {"datasets": set(), "embeddings": set()}
-                stats[approach]["datasets"].add(d)
-                stats[approach]["embeddings"].add(embedding)
+                try:
+                    run_foo(approach_to_execution[approach]["tag"], approach_to_execution[approach]["command"], d, embedding, out_dir)
+                except:
+                    continue
+                    log_message(f"Approach {approach} finished on {d} for embedding {embedding}", _fmt.OK)
+                    if approach not in stats:
+                        stats[approach] = {"datasets": set(), "embeddings": set()}
+                    stats[approach]["datasets"].add(d)
+                    stats[approach]["embeddings"].add(embedding)
     for approach in stats:
         print_message(f"Approach {approach} produced valid outputs on {len(stats[approach]['datasets'])} datasets for {len(stats[approach]['embeddings'])} embeddings.", _fmt.OK)
     
