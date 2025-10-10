@@ -29,7 +29,13 @@ def embeddings(
     team_and_model = model_name.split('/')
     team_name = team_and_model[0]
     model_name = '-'.join(team_and_model[1:])
-    embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
+    if in_tira_sandbox():
+         embedding_dir = tira.input_run_in_sandbox(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id)
+         if not embedding_dir:
+             raise ValueError("not mounted")
+         embedding_dir = Path(embedding_dir) / text_type
+    else:
+        embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
     embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
 
     try:
