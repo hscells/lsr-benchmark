@@ -53,7 +53,7 @@ def all_embeddings():
 
 def all_datasets():
     overview = json.loads((Path(__file__).parent.parent / "datasets" / "overview.json").read_text())
-    return overview.keys():
+    return overview.keys()
 
 @click.argument(
     "approaches",
