@@ -8,3 +8,5 @@ ADD requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt \
 	&& rm -Rf /tmp/requirements.txt \
 	&& pip3 cache purge
+
+ADD run-duckdb.py /run-duckdb.py
