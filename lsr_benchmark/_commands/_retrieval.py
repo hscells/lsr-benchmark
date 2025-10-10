@@ -83,7 +83,7 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
         for m, l in all_messages:
             log_message(m, l)
 
-    if dataset is none or not dataset:
+    if dataset is None or not dataset:
         dataset = all_datasets()
 
     status = verify_tira_installation()
