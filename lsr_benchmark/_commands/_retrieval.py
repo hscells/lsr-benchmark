@@ -9,7 +9,6 @@ from pathlib import Path
 import shutil
 import yaml
 import json
-from tira.io_utils import patch_ir_metadata
 
 
 def run_foo(docker_image, command, dataset_id, embedding, output_dir=None):
@@ -36,6 +35,7 @@ def run_foo(docker_image, command, dataset_id, embedding, output_dir=None):
     tag = yaml.safe_load((Path(tmp_dir) / "retrieval-metadata.yml").read_text())["tag"]
     
     if output_dir is not None:
+        from tira.io_utils import patch_ir_metadata
         output_dir.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(tmp_dir, output_dir)
         patch_ir_metadata(output_dir, {"data": {"test collection": {"name": "/tira-data/input"}}}, {"data": {"test collection": {"name": dataset_id}}})
@@ -76,7 +76,7 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
     def print_message(message, level):
         all_messages.append((message, level))
         os.system("cls" if os.name == "nt" else "clear")
-        print(' '.join(sys.argv))
+        print(' '.join([sys.argv[0].split('/')[-1]] + sys.argv[1:]))
         for m, l in all_messages:
             log_message(m, l)
 
