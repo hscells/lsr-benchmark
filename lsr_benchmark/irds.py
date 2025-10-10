@@ -30,7 +30,7 @@ def embeddings(
     team_name = team_and_model[0]
     model_name = '-'.join(team_and_model[1:])
     if in_tira_sandbox():
-         embedding_dir = tira.input_run_in_sandbox(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id)
+         embedding_dir = tira.input_run_in_sandbox(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}")
          if not embedding_dir:
              raise ValueError("not mounted")
          embedding_dir = Path(embedding_dir) / text_type
