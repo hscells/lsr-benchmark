@@ -14,6 +14,8 @@ import numpy as np
 from kannolo_dataset import KannoloDatasetBuffer
 from kannolo import SparsePlainHNSW
 
+
+
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",)
@@ -68,6 +70,32 @@ def main(dataset, embedding, output, ef_search, k):
             for qid, score, docno in zip(qids, scores, docnos):
                 f.write(f"{qid} Q0 {docno} {rank} {score} kannolo\n")
                 rank += 1
+
+
+class KannoloDatasetBuffer():
+    
+    def __init__(self):
+        self.doc_ids = []
+        self.tokens = []
+        self.values = []
+        self.offsets = [0]
+            
+    def add_document(self, doc_id, tokens, values):
+        self.doc_ids.append(doc_id)
+        self.tokens.append(np.fromiter(map(lambda x: int(x), tokens), dtype=np.int32))  
+        self.values.append(np.fromiter(values, dtype=np.float32))
+        self.offsets.append(self.offsets[-1] + len(tokens))
+    
+    def __len__(self):
+        return len(self.doc_ids)
+
+    def finalize(self):
+        self.doc_ids = np.array(self.doc_ids)
+        self.tokens = np.ascontiguousarray(np.concatenate(self.tokens, dtype=np.int32).flatten())
+        self.values = np.ascontiguousarray(np.concatenate(self.values, dtype=np.float32).flatten())
+        self.offsets = np.ascontiguousarray(np.array(self.offsets, dtype=np.int32).flatten())
+        
+        
 
 if __name__ == "__main__":
     main()
