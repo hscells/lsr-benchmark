@@ -53,7 +53,7 @@ def all_embeddings():
 
 def all_datasets():
     overview = json.loads((Path(__file__).parent.parent / "datasets" / "overview.json").read_text())
-    return overview.keys()
+    return list(overview.keys())
 
 @click.argument(
     "approaches",
@@ -69,9 +69,9 @@ def all_datasets():
 )
 @click.option(
     "--dataset",
-    type=str,
+    type=click.Choice(["all"] + all_datasets),
     multiple=True,
-    help="The output directory to write to.",
+    help="The datasets to run on.",
 )
 def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
     all_messages = []
@@ -83,7 +83,7 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
         for m, l in all_messages:
             log_message(m, l)
 
-    if dataset is None or not dataset:
+    if dataset is None or not dataset or "all" in dataset:
         dataset = all_datasets()
 
     status = verify_tira_installation()
