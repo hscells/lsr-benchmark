@@ -1,0 +1,5 @@
+git+https://github.com/reneuir/lsr-benchmark.git
+tirex-tracker
+click
+python-terrier
+pyterrier_pisa
