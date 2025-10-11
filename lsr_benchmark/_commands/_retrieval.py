@@ -6,6 +6,7 @@ from tira.third_party_integrations import temporary_directory
 from tira.check_format import _fmt, check_format
 from tira.rest_api_client import Client
 from pathlib import Path
+from lsr_benchmark.datasets import all_embeddings, all_datasets
 import shutil
 import yaml
 import json
@@ -42,18 +43,6 @@ def run_foo(docker_image, command, dataset_id, embedding, output_dir=None):
     
     return tag
 
-def all_embeddings():
-    overview = json.loads((Path(__file__).parent.parent / "datasets" / "overview.json").read_text())
-    ret = set()
-
-    for dataset_id, stats in overview.items():
-        for embedding, embedding_size in stats['embedding-sizes'].items():
-            ret.add(embedding)
-    return ret
-
-def all_datasets():
-    overview = json.loads((Path(__file__).parent.parent / "datasets" / "overview.json").read_text())
-    return list(overview.keys())
 
 @click.argument(
     "approaches",
@@ -69,7 +58,7 @@ def all_datasets():
 )
 @click.option(
     "--dataset",
-    type=click.Choice(["all"] + all_datasets),
+    type=click.Choice(["all"] + all_datasets()),
     multiple=True,
     help="The datasets to run on.",
 )

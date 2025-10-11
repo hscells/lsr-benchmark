@@ -17,6 +17,7 @@ from tira.check_format import lines_if_valid
 from ir_measures import parse_trec_measure
 
 import lsr_benchmark
+from lsr_benchmark.datasets import TIRA_DATASET_ID_TO_IR_DATASET_ID, all_embeddings
 
 if TYPE_CHECKING:
     from typing import _KT, _T, _VT, Any, Callable, Literal, Optional, Union
@@ -164,6 +165,16 @@ def __get_dataset_name(metadata: Dict[str, Any]) -> str:
     return list(candidates)[0]
 
 
+def __get_embedding_name(p: Path):
+    # FIXME read this from metadata
+    ret = []
+    for embedding in all_embeddings():
+        if embedding in str(Path(p)).split("/"):
+            ret += [embedding]
+    if len(ret) != 1:
+        raise ValueError(f"can not process {p}")
+    return ret[0]
+
 def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
     suffix_to_routine: dict[str, Callable[[pd.DataFrame], None]] = {
         ".csv": lambda df: df.to_csv(specifier),
@@ -171,10 +182,12 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
         ".htm": lambda df: df.to_html(specifier),
         ".html": lambda df: df.to_html(specifier),
         ".json": lambda df: df.to_json(specifier),
+        ".gz": lambda df: df.to_json(specifier, lines=True, orient="records"),
         ".tex": lambda df: df.to_latex(specifier),
         ".md": lambda df: df.to_markdown(specifier),
         ".parquet": lambda df: df.to_parquet(specifier),
     }
+
     if specifier == "-":
         return print
     elif (routine := suffix_to_routine.get(Path(specifier).suffix, None)) is not None:
@@ -204,6 +217,10 @@ def evaluate_approach(approach: str, measure: list[str]):
     assert dset.has_qrels()
 
     ret.update({str(k): v for k, v in ir_measures.calc_aggregate(irmeasures, dset.qrels, run).items()})
+    ret["tira-dataset-id"] = dataset
+    ret["ir-dataset-id"] = TIRA_DATASET_ID_TO_IR_DATASET_ID[dataset]
+    ret["approach"] = approach
+    ret["embedding/model"] = __get_embedding_name(approach)
     return ret
 
 
@@ -240,9 +257,10 @@ def evaluate(approaches: list[str], measure: list[str], out: str, upload: bool) 
     approaches = [x for xs in map(glob, approaches) for x in xs]
     output_routine = __get_output_routine(out)
 
-    scores: dict[str, dict[str, float]] = defaultdict(dict)
-    for approach in approaches:
-        scores[approach] = evaluate_approach(approach, measure)
+    scores: list = []
+    from tqdm import tqdm
+    for approach in tqdm(approaches):
+        scores += [evaluate_approach(approach, measure)]
 
         if upload:
             from tira.tira_cli import upload_command
