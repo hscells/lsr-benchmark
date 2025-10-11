@@ -20,7 +20,7 @@ import pandas as pd
 @click.option('--quantize', is_flag=True, help="Whether to quantize the index scores to integers.")
 @click.option("--k", type=int, required=False, default=10, help="TBD.")
 def main(dataset, embedding, output, quantize, k):
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
     register_metadata({"actor": {"team": "reneuir-baselines"}, "tag": f"duckdb-{embedding.replace('/', '-')}-{'quantize-' if quantize else ''}{k}"})

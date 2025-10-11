@@ -22,7 +22,7 @@ import gzip
 @click.option("--query-cut", type=int, required=False, default=10, help="Number of posting lists to explore when searching for candidates.")
 @click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
 def main(dataset, embedding, output, heap_factor, query_cut, k):
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
     seismic_dataset = SeismicDataset()

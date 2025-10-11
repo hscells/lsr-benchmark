@@ -10,5 +10,5 @@ RUN pip3 install -r /tmp/requirements.txt
 
 RUN python3 -c "import pyterrier as pt; pt.init();"
 
-ADD run-pyterrier.py /run-pyterrier.py
+ADD run-pyterrier-splade.py /run-pyterrier-splade.py
 

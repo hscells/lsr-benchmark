@@ -11,6 +11,7 @@ from tirex_tracker import tracking, ExportFormat
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
+from ._commands._retrieval import retrieval
 import os
 
 
@@ -64,7 +65,45 @@ def create_lsr_corpus(directory):
     config = json.loads((directory/"config.json").read_text())
     create_subsampled_corpus(directory, config)
 
+
+@main.command()
+def overview():
+    overview = json.loads((Path(__file__).parent / "datasets" / "overview.json").read_text())
+    df_dataset = []
+    overall_size = 0
+    overall_datasets = len(overview)
+    overall_embeddings = set()
+    def f(s):
+        return str(int(s/(1024))) + " MB"
+
+    import pandas as pd
+    model_to_size = {}
+
+    for dataset_id, stats in overview.items():
+        overall_size += int(stats['dataset-size'])
+        embeddings_for_dataset = 0
+        for embedding, embedding_size in stats['embedding-sizes'].items():
+            overall_size += int(embedding_size)
+            embeddings_for_dataset += int(embedding_size)
+            overall_embeddings.add(embedding)
+            model_to_size[embedding] = int(embedding_size) + model_to_size.get(embedding, 0)
+
+        df_dataset += [{"Dataset": dataset_id, "Text": f(int(stats['dataset-size'])), "Avg. Embeddings": f(embeddings_for_dataset/len(overall_embeddings))}]
+    df_dataset = pd.DataFrame(df_dataset)
+    df_dataset.index = ['']*len(df_dataset)
+    
+    df_embeddings = []
+    for k, v in model_to_size.items():
+        df_embeddings += [{"Model": k, "Size (avg)": f(v/len(overall_embeddings))}]
+
+
+    df_embeddings = pd.DataFrame(df_embeddings)
+    df_embeddings.index = ['']*len(df_embeddings)
+
+    print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset}\n\nEmbeddings:\n{df_embeddings}")
+
 main.command()(evaluate)
+main.command()(retrieval)
 
 if __name__ == '__main__':
     main()
