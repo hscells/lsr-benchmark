@@ -43,7 +43,7 @@ class KannoloDatasetBuffer():
 
 @click.option("--k", type=int, required=False, default=10, help="TBD.")
 def main(dataset, embedding, output, ef_search, k):
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
 
