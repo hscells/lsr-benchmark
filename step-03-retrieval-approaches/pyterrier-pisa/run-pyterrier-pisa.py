@@ -30,7 +30,7 @@ def main(dataset, output, k):
 
     with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA):
         rmtree("/tmp/.ignored", ignore_errors=True)
-        index = PisaIndex("/tmp/.ignored", stemmer='none')
+        index = PisaIndex("/tmp/.ignored")
         index.index(tqdm(documents, "Index docs"))
 
     rmtree(output / ".tirex-tracker")
