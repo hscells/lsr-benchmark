@@ -147,7 +147,11 @@ def __parse_measure(measure: "str") -> "tuple[str, Literal['ir_measure', 'tirex'
     try:
         return (measure, 'ir_measure', parse_trec_measure(measure)[0])
     except ValueError:
-        pass
+        try:
+            return (measure, 'ir_measure', ir_measures.parse_measure(measure))
+        except:
+            pass
+
     return (measure, 'tirex', __parse_tirex_measure(measure))
 
 
@@ -236,7 +240,7 @@ def evaluate_approach(approach: str, measure: list[str]):
     type=__parse_measure,
     required=False,
     multiple=True,
-    default=["ndcg_cut.10",  "P_5", "map_cut.100", "runtime_wallclock", "energy_total"],
+    default=["ndcg_cut.10", "nDCG(judged_only=True)@10", "P_10", "RR", "runtime_wallclock", "energy_total"],
     help="The dataset id or a local directory.",
 )
 @click.option(
