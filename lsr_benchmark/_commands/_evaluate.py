@@ -171,6 +171,8 @@ def __get_embedding_name(p: Path):
     for embedding in all_embeddings():
         if embedding in str(Path(p)).split("/"):
             ret += [embedding]
+    if '/none/' in str(p):
+        return None
     if len(ret) != 1:
         raise ValueError(f"can not process {p}")
     return ret[0]

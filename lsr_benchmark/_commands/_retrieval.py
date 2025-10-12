@@ -17,7 +17,10 @@ def run_foo(docker_image, command, dataset_id, embedding, output_dir=None):
         return
     tira = Client()
     dataset_path = tira.download_dataset("lsr-benchmark", dataset_id)
-    embeddings_dir = tira.get_run_output(f'lsr-benchmark/lightning-ir/{embedding}', dataset_id)
+    if embedding.lower() != "none":
+        embeddings_dir = tira.get_run_output(f'lsr-benchmark/lightning-ir/{embedding}', dataset_id)
+    else:
+        embeddings_dir = None
     tmp_dir = temporary_directory()
     tira.local_execution.run(
         image=docker_image,
@@ -62,7 +65,13 @@ def run_foo(docker_image, command, dataset_id, embedding, output_dir=None):
     multiple=True,
     help="The datasets to run on.",
 )
-def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
+@click.option(
+    "--embedding",
+    type=click.Choice(["all", "none", ] + all_embeddings()),
+    multiple=True,
+    help="The datasets to run on.",
+)
+def retrieval(approaches: list[str], dataset: list[str], embedding: list[str], out: str) -> int:
     all_messages = []
 
     def print_message(message, level):
@@ -74,6 +83,11 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
 
     if dataset is None or not dataset or "all" in dataset:
         dataset = all_datasets()
+
+    if embedding is None or not embedding or "all" in embedding:
+        embedding = all_embeddings()
+    if embedding and "none" in embedding:
+        embedding = ["none"]
 
     status = verify_tira_installation()
 
@@ -93,24 +107,24 @@ def retrieval(approaches: list[str], dataset: list[str], out: str) -> int:
         cmd = (Path(approach) / "README.md").read_text().split("tira-cli code-submission")[1].split('--command')[1].split("'")[1]
 
         log_message(f"Approach {approach} is compiled.", _fmt.OK)
-        system_tag = run_foo(docker_tag, cmd, 'tiny-example-20251002_0-training', 'naver-splade-v3')
+        system_tag = run_foo(docker_tag, cmd, 'tiny-example-20251002_0-training', embedding[0])
         print_message(f"Approach {approach} compiled and produced valid outputs on example dataset (tag={system_tag}).", _fmt.OK)
         approach_to_execution[approach] = {"tag": docker_tag, "command": cmd}
 
     stats = {}
     for d in dataset:
-        for embedding in all_embeddings():
+        for e in embedding:
             for approach in approaches:
-                out_dir = Path(out) / d / embedding / approach
+                out_dir = Path(out) / d / e / approach
                 try:
-                    run_foo(approach_to_execution[approach]["tag"], approach_to_execution[approach]["command"], d, embedding, out_dir)
+                    run_foo(approach_to_execution[approach]["tag"], approach_to_execution[approach]["command"], d, e, out_dir)
                 except:
                     continue
-                    log_message(f"Approach {approach} finished on {d} for embedding {embedding}", _fmt.OK)
+                    log_message(f"Approach {approach} finished on {d} for embedding {e}", _fmt.OK)
                     if approach not in stats:
                         stats[approach] = {"datasets": set(), "embeddings": set()}
                     stats[approach]["datasets"].add(d)
-                    stats[approach]["embeddings"].add(embedding)
+                    stats[approach]["embeddings"].add(e)
     for approach in stats:
         print_message(f"Approach {approach} produced valid outputs on {len(stats[approach]['datasets'])} datasets for {len(stats[approach]['embeddings'])} embeddings.", _fmt.OK)
     
