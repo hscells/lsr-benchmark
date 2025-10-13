@@ -8,3 +8,5 @@ inputs-extracted
 truths-extracted
 splade-v3-non-segmented-extracted
 splade-v3-non-segmented.zip
+build/
+dist/
