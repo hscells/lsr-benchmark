@@ -40,4 +40,4 @@ TIRA_DATASET_ID_TO_IR_DATASET_ID = {
 IR_DATASET_TO_TIRA_DATASET = {v:k for k, v in TIRA_DATASET_ID_TO_IR_DATASET_ID.items()}
 
 def all_ir_datasets():
-    return sorted([TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in all_datasets() if i in TIRA_DATASET_ID_TO_IR_DATASET_ID])
+    return sorted([TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in all_datasets() if i in TIRA_DATASET_ID_TO_IR_DATASET_ID and TIRA_DATASET_ID_TO_IR_DATASET_ID[i]])

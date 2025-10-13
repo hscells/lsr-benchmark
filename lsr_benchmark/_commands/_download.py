@@ -1,15 +1,16 @@
 import click
-from lsr_benchmark.datasets import all_embeddings, all_datasets, all_ir_datasets, TIRA_DATASET_ID_TO_IR_DATASET_ID
+from tira.rest_api_client import Client
+from pathlib import Path
+from lsr_benchmark.datasets import all_embeddings, all_ir_datasets, IR_DATASET_TO_TIRA_DATASET
+from shutil import copytree
 
 @click.argument(
     "dataset",
-    type=str,
-    type=click.Choice([TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in all_datasets()),
+    type=click.Choice(all_ir_datasets()),
     nargs=1,
 )
 @click.argument(
     "embedding",
-    type=str,
     type=click.Choice(all_embeddings()),
     nargs=1,
 )
@@ -22,4 +23,9 @@ from lsr_benchmark.datasets import all_embeddings, all_datasets, all_ir_datasets
     help="The output directory to write to.",
 )
 def download(dataset, embedding, out):
-    print("foo")
+    tira = Client()
+    ret = tira.get_run_output(f'lsr-benchmark/lightning-ir/{embedding}', IR_DATASET_TO_TIRA_DATASET[dataset])
+    if out is not None:
+        copytree(ret, out)
+        ret = out
+    print(ret)
