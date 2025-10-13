@@ -12,6 +12,7 @@ SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
 from ._commands._retrieval import retrieval
+from ._commands._download import download
 import os
 
 
@@ -102,6 +103,7 @@ def overview():
 
     print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset}\n\nEmbeddings:\n{df_embeddings}")
 
+main.command()(download)
 main.command()(evaluate)
 main.command()(retrieval)
 

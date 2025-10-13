@@ -17,6 +17,7 @@ def all_datasets():
     overview = lsr_overview()
     return sorted(list(overview.keys()))
 
+
 TIRA_DATASET_ID_TO_IR_DATASET_ID = {
     'trec-18-web-20251008-test': 'clueweb09/en/trec-web-2009',
     'trec-19-web-20251008-test': 'clueweb09/en/trec-web-2010',
@@ -35,3 +36,8 @@ TIRA_DATASET_ID_TO_IR_DATASET_ID = {
     'trec-robust-2004-fold-5-20250926-test': 'disks45/nocr/trec-robust-2004/fold5',
     'tiny-example-20251002_0-training': None
 }
+
+IR_DATASET_TO_TIRA_DATASET = {v:k for k, v in TIRA_DATASET_ID_TO_IR_DATASET_ID.items()}
+
+def all_ir_datasets():
+    return sorted([TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in all_datasets() if i in TIRA_DATASET_ID_TO_IR_DATASET_ID])
