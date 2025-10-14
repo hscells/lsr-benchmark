@@ -178,7 +178,8 @@ def __get_embedding_name(p: Path):
     if '/none/' in str(p):
         return None
     if len(ret) != 1:
-        raise ValueError(f"can not process {p}")
+        #raise ValueError(f"can not process {p}")
+        return None
     return ret[0]
 
 def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
@@ -195,7 +196,7 @@ def __get_output_routine(specifier: str) -> "Callable[[pd.DataFrame], None]":
     }
 
     if specifier == "-":
-        return print
+        return lambda i: print(pd.DataFrame({j["approach"]: j.to_dict() for _, j in i.iterrows()}))
     elif (routine := suffix_to_routine.get(Path(specifier).suffix, None)) is not None:
         return routine
     else:
