@@ -1,0 +1,10 @@
+FROM pytorch/pytorch:2.8.0-cuda12.9-cudnn9-runtime
+
+ADD requirements.txt /tmp/
+
+RUN apt-get update && apt-get install -y git && python3 -m pip install --no-cache -r /tmp/requirements.txt
+ENV HF_HUB_OFFLINE=1
+
+RUN pip3 uninstall -y lightning-ir && pip3 install git+https://github.com/webis-de/lightning-ir.git
+
+ADD bgem3.py /bgem3.py
