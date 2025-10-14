@@ -12,7 +12,7 @@ tira-cli code-submission \
     --task lsr-benchmark \
     --tira-vm-id bgem3.py \
     --dataset tiny-example-20251002_0-training \
-    --command '/bgem3.py.py --dataset $inputDataset --save_dir $outputDir --model BAAI/bge-m3' \
+    --command '/bgem3.py --dataset $inputDataset --save_dir $outputDir --model BAAI/bge-m3' \
     --mount-hf-model BAAI/bge-m3 \
     --dry-run
 ```
