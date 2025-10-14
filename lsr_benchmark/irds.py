@@ -41,7 +41,8 @@ def embeddings(
              embedding_dir = Path(embedding_dir) / text_type
         else:
             embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
-        embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
+
+    embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
 
     try:
         from tirex_tracker import register_file
