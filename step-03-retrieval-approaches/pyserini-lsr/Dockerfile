@@ -8,5 +8,7 @@ ADD requirements.txt /tmp/requirements.txt
 
 RUN pip3 install -r /tmp/requirements.txt
 
+RUN pip3 install faiss-cpu
+
 ADD run-pyserini-lsr.py /run-pyserini-lsr.py
 
