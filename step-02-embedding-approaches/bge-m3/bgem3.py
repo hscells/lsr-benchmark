@@ -33,31 +33,33 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     doc_dataset = DocDataset(dataset_id)
     query_dataset = QueryDataset(dataset_id)
 
+
+
     # embed queries and documents
     for text_type, local_dataset in zip(["query", "doc"], [query_dataset, doc_dataset]):
         local_dataset.prepare_data()
         text_type_save_dir = save_dir / text_type
         ids = list()
         all_data = list()
-        all_amounts = list()
+        all_amounts = [0]
         all_columns = list()
         with tracking(export_file_path=text_type_save_dir / f"{text_type}-ir-metadata.yml"):
             for data in chunked(create_iter(local_dataset,text_type), batch_size):
                 _id = [x[0] for x in data]
                 text = [x[1] for x in data]
-                output = module.encode(text, return_dense=False, return_sparse=True, return_colbert_vecs=False)
+                output = module.encode(text, return_dense=False, return_sparse=True, return_colbert_vecs=False, max_length=8192)
 
-                data = [xs for x in output['lexical_weights'] for xs in list(x.values())]
+                data = [float(xs) for x in output['lexical_weights'] for xs in list(x.values())]
                 columns = [list(x.keys()) for x in output['lexical_weights']]
                 amounts = [len(c) for c in columns]
-                columns = [xs for x in columns for xs in x]      
+                columns = [int(xs) for x in columns for xs in x]      
                 ids.extend(_id)
                 all_amounts.extend(amounts)
                 all_data.extend(data)
                 all_columns.extend(columns)
 
-        data = np.array(all_data)
-        indices = np.array(all_columns).astype("int")
+        data = np.array(all_data, dtype=np.float32)
+        indices = np.array(all_columns,dtype=np.int32)
         indptr = np.array(all_amounts).cumsum(0)    
 
         np.savez_compressed(
