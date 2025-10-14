@@ -2,4 +2,5 @@ git+https://github.com/reneuir/lsr-benchmark.git
 tirex-tracker
 click
 pyserini
+faiss-cpu
 more_itertools
