@@ -33,8 +33,6 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
     doc_dataset = DocDataset(dataset_id)
     query_dataset = QueryDataset(dataset_id)
 
-
-
     # embed queries and documents
     for text_type, local_dataset in zip(["query", "doc"], [query_dataset, doc_dataset]):
         local_dataset.prepare_data()
@@ -59,7 +57,7 @@ def main(dataset: str, model: str, batch_size: int, save_dir: Path):
                 all_columns.extend(columns)
 
         data = np.array(all_data)
-        indices = np.array(all_columns)
+        indices = np.array(all_columns).astype("int")
         indptr = np.array(all_amounts).cumsum(0)    
 
         np.savez_compressed(
