@@ -34,6 +34,8 @@ def embeddings(
          if not embedding_dir:
              raise ValueError("not mounted")
          embedding_dir = Path(embedding_dir) / text_type
+    elif Path(model_name).is_dir() and (Path(model_name) / text_type).is_dir() and (Path(model_name) / text_type / f"{text_type}-embeddings.npz").exists():
+        embedding_dir = model_name) / text_type
     else:
         embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
     embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
