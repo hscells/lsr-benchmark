@@ -24,21 +24,24 @@ _IR_DATASETS_FROM_TIRA = None
 def embeddings(
         dataset_id: str, model_name: str, text_type: str
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
-    from tira.rest_api_client import Client
-    tira = Client()
-    team_and_model = model_name.split('/')
-    team_name = team_and_model[0]
-    model_name = '-'.join(team_and_model[1:])
-    if in_tira_sandbox():
-         embedding_dir = tira.input_run_in_sandbox(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}")
-         if not embedding_dir:
-             raise ValueError("not mounted")
-         embedding_dir = Path(embedding_dir) / text_type
-    elif Path(model_name).is_dir() and (Path(model_name) / text_type).is_dir() and (Path(model_name) / text_type / f"{text_type}-embeddings.npz").exists():
+
+    if Path(model_name).is_dir() and (Path(model_name) / text_type).is_dir() and (Path(model_name) / text_type / f"{text_type}-embeddings.npz").exists():
         embedding_dir = Path(model_name) / text_type
     else:
-        embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
-    embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
+        from tira.rest_api_client import Client
+        tira = Client()
+
+        team_and_model = model_name.split('/')
+        team_name = team_and_model[0]
+        model_name = '-'.join(team_and_model[1:])
+        if in_tira_sandbox():
+             embedding_dir = tira.input_run_in_sandbox(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}")
+             if not embedding_dir:
+                 raise ValueError("not mounted")
+             embedding_dir = Path(embedding_dir) / text_type
+        else:
+            embedding_dir = tira.get_run_output(f"{TIRA_LSR_TASK_ID}/{team_name}/{model_name}", dataset_id) / text_type
+        embeddings = np.load(embedding_dir / f"{text_type}-embeddings.npz")
 
     try:
         from tirex_tracker import register_file
