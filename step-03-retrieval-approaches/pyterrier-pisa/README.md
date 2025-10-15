@@ -5,6 +5,20 @@ This approach does retrieval as [https://github.com/cmacdonald/pyt_splade](pyt_s
 
 ## Submission
 
+with pre-compute impact:
+
+```
+tira-cli code-submission \
+    --path . \
+    --task lsr-benchmark \
+    --tira-vm-id reneuir-baselines \
+    --dataset tiny-example-20251002_0-training \
+    --command '/run-pyterrier-pisa.py --precompute_impact --dataset $inputDataset --output $outputDir' \
+    --dry-run
+```
+
+without pre-compute impact:
+
 ```
 tira-cli code-submission \
     --path . \
