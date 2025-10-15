@@ -13,7 +13,7 @@ tira-cli code-submission \
     --task lsr-benchmark \
     --tira-vm-id reneuir-baselines \
     --dataset tiny-example-20251002_0-training \
-    --command '/run-pyterrier-pisa.py --precompute_impact --dataset $inputDataset --output $outputDir' \
+    --command '/run-pyterrier-pisa.py --precompute-impact --dataset $inputDataset --output $outputDir' \
     --dry-run
 ```
 
