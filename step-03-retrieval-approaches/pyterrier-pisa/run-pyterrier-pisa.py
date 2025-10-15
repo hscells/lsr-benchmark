@@ -16,9 +16,10 @@ from pyterrier_pisa import PisaIndex
 
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
+@click.option("--precompute-impact", type=bool, is_flag=True, default=False, required=False, help="Pre-compute impact scores. This speeds up retrieval..")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
 @click.option("--k", type=int, required=False, default=10, help="The retrieval depth.")
-def main(dataset, output, k):
+def main(dataset, output, k, precompute_impact):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
@@ -32,6 +33,7 @@ def main(dataset, output, k):
         rmtree("/tmp/.ignored", ignore_errors=True)
         index = PisaIndex("/tmp/.ignored")
         index.index(tqdm(documents, "Index docs"))
+        pipeline = index.bm25(precompute_impact=precompute_impact)
 
     rmtree(output / ".tirex-tracker")
 
@@ -39,7 +41,6 @@ def main(dataset, output, k):
     for i in ir_dataset.queries_iter():
         queries.extend([{"qid": i.query_id, "query": i.default_text()}])
 
-    pipeline = index.bm25()
     with tracking(export_file_path=output / "retrieval-metadata.yml", export_format=ExportFormat.IR_METADATA):
         run = pipeline(pd.DataFrame(queries))
 
