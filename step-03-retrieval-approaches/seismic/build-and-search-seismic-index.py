@@ -10,9 +10,6 @@ from pathlib import Path
 from lsr_benchmark.utils import ClickParamTypeLsrDataset
 import gzip
 
-
-
-
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
