@@ -11,7 +11,6 @@ from tirex_tracker import ExportFormat, register_metadata, tracking
 import lsr_benchmark
 from lsr_benchmark.utils import ClickParamTypeLsrDataset
 
-
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
@@ -24,7 +23,7 @@ def main(dataset, output, weights):
 
     register_metadata({"actor": {"team": "reneuir-baselines"}, "tag": f"pyterrier-lexical-embedding-{weights.lower()}"})
     documents = [{"docno": i.doc_id, "text": i.default_text()} for i in ir_dataset.docs_iter()]
-    queries = [{"docno": i.query_id, "text": i.default_text()} for i in ir_dataset.queries_iter()]
+    queries = [{"qid": i.query_id, "text": i.default_text()} for i in ir_dataset.queries_iter()]
 
     doc_save_dir = output / "doc"
     with tracking(export_file_path=doc_save_dir / "doc-ir-metadata.yml", export_format=ExportFormat.IR_METADATA):
@@ -59,28 +58,28 @@ def main(dataset, output, weights):
 
         np.savez_compressed(
             doc_save_dir / "doc-embeddings.npz",
-            data=np.array(data),
-            indices=np.array(indices),
-            indptr=np.array(indptr),
+            data=np.array(data, dtype=np.float32),
+            indices=np.array(indices, dtype=np.int32),
+            indptr=np.array(indptr, dtype=np.int32),
         )
 
     query_save_dir = output / "query"
     with tracking(export_file_path=query_save_dir / "query-ir-metadata.yml", export_format=ExportFormat.IR_METADATA):
 
-        (query_save_dir / "query-ids.txt").write_text("\n".join([query["docno"] for query in queries]))
+        (query_save_dir / "query-ids.txt").write_text("\n".join([query["qid"] for query in queries]))
 
         data = list()
         indices = list()
         indptr = [0]
 
-        tokeniser = pt.autoclass("org.terrier.indexing.tokenisation.Tokeniser").getTokeniser()
-        stemmer = pt.autoclass("org.terrier.terms.PorterStemmer")()
+        tokeniser = pt.java.autoclass("org.terrier.indexing.tokenisation.Tokeniser").getTokeniser()
+        stemmer = pt.java.autoclass("org.terrier.terms.PorterStemmer")()
 
         for query in queries:
             query_text = query["text"]
 
             tokens = set(stemmer.stem(token) for token in tokeniser.getTokens(query_text))
-
+            print(query["text"], tokens)
             length = 0
             for token in tokens:
                 lee = lex.getLexiconEntry(token)
@@ -90,13 +89,14 @@ def main(dataset, output, weights):
                 length += 1
                 data.append(1.0)  # for queries we use always the weight 1
                 indices.append(term_id)
+                print(token, '->', term_id)
             indptr.append(length)
 
         np.savez_compressed(
             query_save_dir / "query-embeddings.npz",
-            data=np.array(data),
-            indices=np.array(indices),
-            indptr=np.array(indptr),
+            data=np.array(data, dtype=np.float32),
+            indices=np.array(indices, dtype=np.int32),
+            indptr=np.array(indptr, dtype=np.int32),
         )
 
 
