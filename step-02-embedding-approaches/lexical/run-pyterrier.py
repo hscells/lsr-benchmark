@@ -11,6 +11,40 @@ from tirex_tracker import ExportFormat, register_metadata, tracking
 import lsr_benchmark
 from lsr_benchmark.utils import ClickParamTypeLsrDataset
 
+
+def create_index(texts):
+    indexer = pt.IterDictIndexer("ignored", meta={"docno": 100}, type=pt.IndexingType.MEMORY)
+    index = indexer.index(texts)
+    index_factory = pt.IndexFactory.of(index)
+    return index_factory
+
+
+def get_scores(doc_idx, term_lexicon, index_lexicon, doc_index, direct_index, wmodel):
+    data = []
+    indices = []
+    postings = direct_index.getPostings(doc_index.getDocumentEntry(doc_idx))
+    for posting in postings:
+        term_id = posting.getId()
+        lexicon_entry = term_lexicon.getLexiconEntry(term_id)
+        term = lexicon_entry.getKey()
+        lexicon_entry = index_lexicon.getLexiconEntry(term)
+        if lexicon_entry is None:
+            # term not in index
+            continue
+        term_id = lexicon_entry.getTermId()
+
+        if wmodel is not None:
+            wmodel.setEntryStatistics(lexicon_entry)
+            wmodel.setKeyFrequency(1)
+            wmodel.prepare()
+            data.append(wmodel.score(posting))
+        else:
+            data.append(1.0)
+        indices.append(term_id)
+
+    return data, indices
+
+
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
@@ -23,7 +57,7 @@ def main(dataset, output, weights):
 
     register_metadata({"actor": {"team": "reneuir-baselines"}, "tag": f"pyterrier-lexical-embedding-{weights.lower()}"})
     documents = [{"docno": i.doc_id, "text": i.default_text()} for i in ir_dataset.docs_iter()]
-    queries = [{"qid": i.query_id, "text": i.default_text()} for i in ir_dataset.queries_iter()]
+    queries = [{"docno": i.query_id, "text": i.default_text()} for i in ir_dataset.queries_iter()]
 
     doc_save_dir = output / "doc"
     with tracking(export_file_path=doc_save_dir / "doc-ir-metadata.yml", export_format=ExportFormat.IR_METADATA):
@@ -34,69 +68,50 @@ def main(dataset, output, weights):
         indices = list()
         indptr = [0]
 
-        indexer = pt.IterDictIndexer("ignored", meta={"docno": 100}, type=pt.IndexingType.MEMORY)
-        index = indexer.index(documents)
-        index_factory = pt.IndexFactory.of(index)
-        di = index_factory.getDirectIndex()
-        doi = index_factory.getDocumentIndex()
-        lex = index_factory.getLexicon()
+        index = create_index(documents)
+        direct_index = index.getDirectIndex()
+        doc_index = index.getDocumentIndex()
+        doc_lexicon = index.getLexicon()
         wmodel = pt.java.autoclass("org.terrier.matching.models." + weights)()
-        wmodel.setCollectionStatistics(index_factory.getCollectionStatistics())
+        wmodel.setCollectionStatistics(index.getCollectionStatistics())
         for i in range(len(documents)):
-            postings = di.getPostings(doi.getDocumentEntry(i))
-            length = 0
-            for posting in postings:
-                term_id = posting.getId()
-                lee = lex.getLexiconEntry(term_id)
-                wmodel.setEntryStatistics(lex.getLexiconEntry(lee.getKey()))
-                wmodel.setKeyFrequency(1)
-                wmodel.prepare()
-                data.append(wmodel.score(posting))
-                indices.append(term_id)
-                length += 1
-            indptr.append(length)
+            doc_data, doc_indices = get_scores(i, doc_lexicon, doc_lexicon, doc_index, direct_index, wmodel)
+            data.extend(doc_data)
+            indices.extend(doc_indices)
+            indptr.append(len(data))
 
         np.savez_compressed(
             doc_save_dir / "doc-embeddings.npz",
             data=np.array(data, dtype=np.float32),
             indices=np.array(indices, dtype=np.int32),
-            indptr=np.array(indptr, dtype=np.int32),
+            indptr=np.array(indptr, dtype=np.int64),
         )
 
     query_save_dir = output / "query"
     with tracking(export_file_path=query_save_dir / "query-ir-metadata.yml", export_format=ExportFormat.IR_METADATA):
 
-        (query_save_dir / "query-ids.txt").write_text("\n".join([query["qid"] for query in queries]))
+        (query_save_dir / "query-ids.txt").write_text("\n".join([query["docno"] for query in queries]))
 
         data = list()
         indices = list()
         indptr = [0]
 
-        tokeniser = pt.java.autoclass("org.terrier.indexing.tokenisation.Tokeniser").getTokeniser()
-        stemmer = pt.java.autoclass("org.terrier.terms.PorterStemmer")()
+        index = create_index(queries)
+        direct_index = index.getDirectIndex()
+        doc_index = index.getDocumentIndex()
+        query_lexicon = index.getLexicon()
 
-        for query in queries:
-            query_text = query["text"]
-
-            tokens = set(stemmer.stem(token) for token in tokeniser.getTokens(query_text))
-            print(query["text"], tokens)
-            length = 0
-            for token in tokens:
-                lee = lex.getLexiconEntry(token)
-                if lee is None:
-                    continue
-                term_id = lee.getTermId()
-                length += 1
-                data.append(1.0)  # for queries we use always the weight 1
-                indices.append(term_id)
-                print(token, '->', term_id)
-            indptr.append(length)
+        for i in range(len(queries)):
+            query_data, query_indices = get_scores(i, query_lexicon, doc_lexicon, doc_index, direct_index, None)
+            data.extend(query_data)
+            indices.extend(query_indices)
+            indptr.append(len(data))
 
         np.savez_compressed(
             query_save_dir / "query-embeddings.npz",
             data=np.array(data, dtype=np.float32),
             indices=np.array(indices, dtype=np.int32),
-            indptr=np.array(indptr, dtype=np.int32),
+            indptr=np.array(indptr, dtype=np.int64),
         )
 
 
