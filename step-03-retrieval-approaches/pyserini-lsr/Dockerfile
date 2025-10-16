@@ -6,7 +6,7 @@ RUN apt-get update \
 
 ADD requirements.txt /tmp/requirements.txt
 
-RUN pip3 install -r /tmp/requirements.txt && \
+RUN pip3 install -r /tmp/requirements.txt \
 	&& pip3 install torch pip --index-url https://download.pytorch.org/whl/cpu
 
 ADD run-pyserini-lsr.py /run-pyserini-lsr.py
