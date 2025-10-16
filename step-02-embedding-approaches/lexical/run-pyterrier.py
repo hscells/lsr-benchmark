@@ -59,9 +59,9 @@ def main(dataset, output, weights):
 
         np.savez_compressed(
             doc_save_dir / "doc-embeddings.npz",
-            data=data,
-            indices=indices,
-            indptr=indptr,
+            data=np.array(data),
+            indices=np.array(indices),
+            indptr=np.array(indptr),
         )
 
     query_save_dir = output / "query"
@@ -94,9 +94,9 @@ def main(dataset, output, weights):
 
         np.savez_compressed(
             query_save_dir / "query-embeddings.npz",
-            data=data,
-            indices=indices,
-            indptr=indptr,
+            data=np.array(data),
+            indices=np.array(indices),
+            indptr=np.array(indptr),
         )
 
 
