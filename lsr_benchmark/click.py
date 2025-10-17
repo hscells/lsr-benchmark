@@ -42,7 +42,7 @@ def retrieve_command():
 
         func = click.option(
             "--embedding",
-            type=click.choice(f"lightning-ir/{i}" for i in all_embeddings()),
+            type=click.Choice(f"lightning-ir/{i}" for i in all_embeddings()),
             required=False,
             default="lightning-ir/naver-splade-v3",
             help="The embedding model."
