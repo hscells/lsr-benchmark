@@ -1,5 +1,6 @@
 from lsr_benchmark.datasets import all_embeddings, all_datasets, TIRA_DATASET_ID_TO_IR_DATASET_ID
 from pathlib import Path
+import os
 
 def retrieve_command():
     import click
