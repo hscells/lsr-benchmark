@@ -11,7 +11,7 @@ import torch
 from tirex_tracker import ExportFormat, register_metadata, tracking
 
 import lsr_benchmark
-from lsr_benchmark.utils import ClickParamTypeLsrDataset
+from lsr_benchmark.click import retrieve_command
 
 
 class EmbeddingsToSparseTensor:
@@ -39,12 +39,7 @@ class EmbeddingsToSparseTensor:
             .to_sparse_csr()  # needed for some reason to work on GPU
         )
 
-
-@click.command()
-@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
-@click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
-@click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
-@click.option("--embedding", type=str, required=True, help="The embedding model.")
+@retrieve_command()
 @click.option("--use_gpu", is_flag=True, help="Whether to use a GPU if available.")
 @click.option("--batch_size", type=int, required=False, default=32, help="Batch size for processing.")
 def main(dataset, embedding, output, k, use_gpu, batch_size):
