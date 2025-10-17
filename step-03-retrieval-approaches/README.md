@@ -1,6 +1,6 @@
 # Retrieval Engines in the lsr_benchmark
 
-This directory contains the retrieval engines that we currently have in the lsr_benchmark. We aim to organize the lsr_benchmark as mono-repo that is fully self contained, for that reason, if you want to contribute new retrieval engines (we would be very happy about that), please make a pull request.
+This directory contains the retrieval engines that we currently have in the lsr_benchmark. We aim to organize the lsr_benchmark as mono-repo that is fully self contained with simple and clean implementations, for that reason, if you want to contribute new retrieval engines (we would be very happy about that), please make a pull request.
 
 Currently, we have 8 retrieval engines that can run lsr retrieval:
 
