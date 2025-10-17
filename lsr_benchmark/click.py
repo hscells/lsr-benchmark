@@ -1,4 +1,4 @@
-from lsr_benchmark.datasets import all_embeddings, all_datasets, TIRA_DATASET_ID_TO_IR_DATASET_ID
+from lsr_benchmark.datasets import all_embeddings, all_datasets, IR_DATASET_TO_TIRA_DATASET, TIRA_DATASET_ID_TO_IR_DATASET_ID
 from pathlib import Path
 import os
 
@@ -12,8 +12,8 @@ def retrieve_command():
             if value in available_datasets:
                 return value
             
-            if value in TIRA_DATASET_ID_TO_IR_DATASET_ID:
-                return TIRA_DATASET_ID_TO_IR_DATASET_ID[value]
+            if value in IR_DATASET_TO_TIRA_DATASET:
+                return IR_DATASET_TO_TIRA_DATASET[value]
 
             if os.path.isdir(value):
                 return os.path.abspath(value)
@@ -24,6 +24,25 @@ def retrieve_command():
 
             self.fail(msg, param, ctx)
 
+    class ClickParamTypeLsrEmbedding(click.ParamType):
+        name = "embedding_or_dir"
+
+        def convert(self, value, param, ctx):
+            if value:
+                value = value.replace("/", "-")
+
+            available_embeddings = all_embeddings()
+            if value in available_datasets:
+                return "lightning-ir/" + value
+
+            if os.path.isdir(value):
+                return os.path.abspath(value)
+
+            msg = f"{value!r} is not a supported embedding " + \
+            f"({', '.join(available_embeddings)}) " + \
+            "or a valid directory path"
+
+            self.fail(msg, param, ctx)
 
     """A decorator that wraps a Click command with standard retrieval options."""
     def decorator(func):
@@ -43,9 +62,9 @@ def retrieve_command():
 
         func = click.option(
             "--embedding",
-            type=click.Choice(f"lightning-ir/{i}" for i in all_embeddings()),
+            type=ClickParamTypeLsrEmbedding(),
             required=False,
-            default="lightning-ir/naver-splade-v3",
+            default="naver/splade-v3",
             help="The embedding model."
         )(func)
 
