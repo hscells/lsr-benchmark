@@ -27,12 +27,16 @@ class EmbeddingsToSparseTensor:
         self.indptr.append(self.indptr[-1] + len(components))
 
     def to_tensor(self, device: torch.device | None = None, size: tuple[int, int] | None = None) -> torch.Tensor:
-        return torch.sparse_csr_tensor(
-            crow_indices=torch.frombuffer(self.indptr, dtype=torch.int64),
-            col_indices=torch.frombuffer(self.indices, dtype=torch.int32),
-            values=torch.frombuffer(self.data, dtype=torch.float32),
-            size=size if size else (len(self.indptr) - 1, max(self.indices) + 1 if self.indices else 0),
-            device=device,
+        return (
+            torch.sparse_csr_tensor(
+                crow_indices=torch.frombuffer(self.indptr, dtype=torch.int64),
+                col_indices=torch.frombuffer(self.indices, dtype=torch.int32),
+                values=torch.frombuffer(self.data, dtype=torch.float32),
+                size=size if size else (len(self.indptr) - 1, max(self.indices) + 1 if self.indices else 0),
+                device=device,
+            )
+            .to_sparse_coo()
+            .to_sparse_csr()  # needed for some reason to work on GPU
         )
 
 
