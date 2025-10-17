@@ -5,6 +5,7 @@ from ir_datasets import registry
 from lsr_benchmark.irds import build_dataset, MAPPING_OF_DATASET_IDS, ir_datasets_from_tira
 from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materialize_qrels
 from click import group, argument
+import lsr_benchmark.click
 
 from tirex_tracker import tracking, ExportFormat
 
