@@ -2,7 +2,7 @@ from lsr_benchmark.datasets import all_embeddings, all_datasets, TIRA_DATASET_ID
 
 def retrieve_command():
     import click
-    class ClickParamTypeLsrDataset(ParamType):
+    class ClickParamTypeLsrDataset(click.ParamType):
         name = "dataset_or_dir"
 
         def convert(self, value, param, ctx):
