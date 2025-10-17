@@ -1,5 +1,17 @@
 ## Submission
 
+
+```
+tira-cli code-submission \
+    --path . \
+    --task lsr-benchmark \
+    --tira-vm-id reneuir-baselines \
+    --dataset tiny-example-20251002_0-training \
+    --command '/build-and-search-seismic-index.py --dataset $inputDataset --use-u32 true --embedding naver/splade-v3 --output $outputDir' \
+    --dry-run
+```
+
+
 ```
 tira-cli code-submission \
     --path . \
