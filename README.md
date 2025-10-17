@@ -27,6 +27,21 @@ The learned sparse retrieval paradigm conducts retrieval in three steps:
 
 You can submit solutions to step 2 (i.e., models that embed documents and queries into sparse embeddings) and/or solutions to step 3 (i.e., retrieval systems). The idea is then to validate all combinations of embeddings with all retrieval systems to identify which solutions work well for which use case, taking different notions of efficiency/effectiveness trade-offs into consideration. The passage segmentation for step 1 is open source (i.e., created via `lsr-benchmark segment-corpus <IR-DATASETS-ID>`) but fixed for this task.
 
+
+# Installation
+
+You can install the lsr_benchmark via:
+
+```
+pip3 install lsr_benchmark
+```
+
+If you want the latest features, you can install from the main branch:
+
+```
+pip3 install git+https://github.com/reneuir/lsr-benchmark.git
+```
+
 # Supported Corproa and Embeddings
 
 Please run `lsr-benchmark overview` for an up-to-date overview over all datasets and all embeddings.
@@ -35,20 +50,6 @@ Please run `lsr-benchmark overview` for an up-to-date overview over all datasets
 
 - Maik: Write how to add new datasets, embeddings, retrieval, evaluation
   - short video
-
-# Installation
-
-To install the lsr-benchmark for development purposes, please clone the repository and then run:
-
-```
-pip3 install -e .
-```
-
-If you want to install from the main branch, please use:
-
-```
-pip3 install git+https://github.com/reneuir/lsr-benchmark.git
-```
 
 # Data
 
