@@ -42,7 +42,7 @@ If you want the latest features, you can install from the main branch:
 pip3 install git+https://github.com/reneuir/lsr-benchmark.git
 ```
 
-# Supported Corproa and Embeddings
+# Supported Corpora and Embeddings
 
 Please run `lsr-benchmark overview` for an up-to-date overview over all datasets and all embeddings.
 
