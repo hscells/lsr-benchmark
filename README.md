@@ -78,19 +78,6 @@ ToDo: We move this list to [https://tira.io/datasets?query=lsr-benchmark](https:
 - [x] [opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill)
 - [ ] [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3)
 
-# Remaining Retrieval Engines
-
-- [ ] anserini: Carlos
-- [x] duckdb
-- [x] kANNolo
-- [ ] naive with dictionaries or with rust: Cosimo
-- [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
-- [x] pyterrier
-- [x] pyt_splade
-- [x] pyt_splade_pisa
-- [ ] pytorch sparse naive implementation: Ferdi
-- [x] seismic
-
 # Installation
 
 To install the lsr-benchmark for development purposes, please clone the repository and then run:

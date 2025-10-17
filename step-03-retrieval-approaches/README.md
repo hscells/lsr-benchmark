@@ -32,4 +32,11 @@ The following snippet runs all lexical retrieval engines on all datasets and sto
 lsr-benchmark retrieval -o ../runs pyterrier-naive/ pyterrier-pisa/ --embedding none
 ```
 
+## Remaining Retrieval Engines
 
+We are in the progress of adding the following remaining retrieval engines:
+
+- [ ] anserini: Carlos
+- [ ] naive with dictionaries or with rust: Cosimo
+- [ ] opensearch (Maybe a testcontainer as starting point?): Carlos
+- [ ] opensearch seismic (would be interesting to compare the plain seismic with a "production ready" variant"): Carlos
