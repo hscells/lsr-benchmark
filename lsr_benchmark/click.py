@@ -8,7 +8,7 @@ def retrieve_command():
 
         def convert(self, value, param, ctx):
             available_datasets = all_datasets()
-            if value in all_datasets:
+            if value in available_datasets:
                 return value
             
             if value in TIRA_DATASET_ID_TO_IR_DATASET_ID:
@@ -18,7 +18,7 @@ def retrieve_command():
                 return os.path.abspath(value)
 
             msg = f"{value!r} is not a supported dataset " + \
-            f"({', '.join(available_datasets)}) " + \
+            f"({', '.join(TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in available_datasets)}) " + \
             "or a valid directory path"
 
             self.fail(msg, param, ctx)
