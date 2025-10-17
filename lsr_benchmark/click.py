@@ -19,7 +19,7 @@ def retrieve_command():
                 return os.path.abspath(value)
 
             msg = f"{value!r} is not a supported dataset " + \
-            f"({', '.join(TIRA_DATASET_ID_TO_IR_DATASET_ID[i] for i in available_datasets)}) " + \
+            f"({', '.join(TIRA_DATASET_ID_TO_IR_DATASET_ID.get(i, i) for i in available_datasets)}) " + \
             "or a valid directory path"
 
             self.fail(msg, param, ctx)
