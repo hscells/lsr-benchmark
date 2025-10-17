@@ -7,17 +7,11 @@ from tqdm import tqdm
 from tirex_tracker import tracking, ExportFormat, register_metadata
 from shutil import rmtree
 from pathlib import Path
-from lsr_benchmark.utils import ClickParamTypeLsrDataset
+from lsr_benchmark.click import retrieve_command
 import gzip
 
 
-
-
-@click.command()
-@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
-@click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",)
-@click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
-@click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
+@retrieve_command()
 def main(dataset, embedding, output, k):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
@@ -30,7 +24,6 @@ def main(dataset, embedding, output, k):
 
     with tracking(export_file_path=output / "index-metadata.yml", export_format=ExportFormat.IR_METADATA, ):
         print("There is no indexing with this technique.")
-
 
     query_embeddings = ir_dataset.query_embeddings(model_name=embedding)
 

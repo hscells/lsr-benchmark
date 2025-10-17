@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 import ir_datasets
 import lsr_benchmark
+from lsr_benchmark.click import retrieve_command
 import click
 from seismic import SeismicIndex, SeismicDataset, SeismicDatasetLV, SeismicIndexLV
 from tqdm import tqdm
 from tirex_tracker import tracking, ExportFormat, register_metadata
 from shutil import rmtree
 from pathlib import Path
-from lsr_benchmark.utils import ClickParamTypeLsrDataset
 import gzip
 
-@click.command()
-@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
-@click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
-)
-@click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
+
+@retrieve_command()
 @click.option("--heap-factor", type=float, required=False, default=0.8, help="TBD.")
 @click.option("--query-cut", type=int, required=False, default=10, help="Number of posting lists to explore when searching for candidates.")
-@click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
 @click.option("--use-u32", type=bool, required=False, default=False, help="Whether to use u32 for component ids, required for datasets with many components..")
-
 def main(dataset, embedding, output, heap_factor, query_cut, k, use_u32):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)

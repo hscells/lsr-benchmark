@@ -8,7 +8,7 @@ import pandas as pd
 from shutil import rmtree
 from more_itertools import chunked
 import ir_datasets
-from lsr_benchmark.utils import ClickParamTypeLsrDataset
+from lsr_benchmark.click import retrieve_command
 from math import floor
 import gzip
 
@@ -122,11 +122,7 @@ def clean_docid(docid):
         docid = int(docid)
     return str(docid)
 
-@click.command()
-@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True,help="The dataset id or a local directory.")
-@click.option("--embedding", type=str, required=False, default="lightning-ir/naver/splade-v3", help="The embedding model.")
-@click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
-@click.option("--k", type=int, required=False, default=10, help="The retrieval depth.")
+@retrieve_command()
 def main(dataset, output, embedding, k):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)

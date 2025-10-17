@@ -7,18 +7,13 @@ from tqdm import tqdm
 from tirex_tracker import tracking, ExportFormat, register_metadata
 from shutil import rmtree
 from pathlib import Path
-from lsr_benchmark.utils import ClickParamTypeLsrDataset
+from lsr_benchmark.click import retrieve_command
 import gzip
 import pandas as pd
 
 
-@click.command()
-@click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
-@click.option("--output", required=True, type=Path, help="The directory where the output should be stored.",
-)
-@click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
+@retrieve_command()
 @click.option('--quantize', is_flag=True, help="Whether to quantize the index scores to integers.")
-@click.option("--k", type=int, required=False, default=10, help="TBD.")
 def main(dataset, embedding, output, quantize, k):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
