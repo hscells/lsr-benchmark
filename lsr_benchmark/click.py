@@ -16,11 +16,11 @@ def retrieve_command():
             if os.path.isdir(value):
                 return os.path.abspath(value)
 
-        msg = f"{value!r} is not a supported dataset " + \
-        f"({', '.join(available_datasets)}) " + \
-        "or a valid directory path"
+            msg = f"{value!r} is not a supported dataset " + \
+            f"({', '.join(available_datasets)}) " + \
+            "or a valid directory path"
 
-        self.fail(msg, param, ctx)
+            self.fail(msg, param, ctx)
 
 
     """A decorator that wraps a Click command with standard retrieval options."""
