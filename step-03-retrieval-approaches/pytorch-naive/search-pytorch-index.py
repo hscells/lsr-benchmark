@@ -39,8 +39,8 @@ class EmbeddingsToSparseTensor:
 @click.command()
 @click.option("--dataset", type=ClickParamTypeLsrDataset(), required=True, help="The dataset id or a local directory.")
 @click.option("--output", required=True, type=Path, help="The directory where the output should be stored.")
-@click.option("--embedding", type=str, required=False, default="naver/splade-v3", help="The embedding model.")
 @click.option("--k", type=int, required=False, default=10, help="Number of results to return per each query.")
+@click.option("--embedding", type=str, required=True, help="The embedding model.")
 @click.option("--use_gpu", is_flag=True, help="Whether to use a GPU if available.")
 @click.option("--batch_size", type=int, required=False, default=32, help="Batch size for processing.")
 def main(dataset, embedding, output, k, use_gpu, batch_size):
@@ -86,10 +86,10 @@ def main(dataset, embedding, output, k, use_gpu, batch_size):
             topk_scores, topk_indices = torch.topk(scores, k=min(k, scores.shape[1]), dim=-1)
             for query_id, scores, indices in zip(query_ids, topk_scores.cpu().numpy(), topk_indices.cpu().numpy()):
                 ranking_for_query = []
-                for score, index in zip(scores, indices):
+                for score, doc_idx in zip(scores, indices):
                     if score == 0:
                         continue
-                    ranking_for_query.append((query_id, float(score), doc_ids[index]))
+                    ranking_for_query.append((query_id, float(score), doc_ids[doc_idx]))
                 results.append(ranking_for_query)
 
     rmtree(output / ".tirex-tracker")
