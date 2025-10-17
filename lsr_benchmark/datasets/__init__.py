@@ -33,8 +33,7 @@ TIRA_DATASET_ID_TO_IR_DATASET_ID = {
     'trec-robust-2004-fold-2-20250926-test': 'disks45/nocr/trec-robust-2004/fold2',
     'trec-robust-2004-fold-3-20250926-test': 'disks45/nocr/trec-robust-2004/fold3',
     'trec-robust-2004-fold-4-20250926-test': 'disks45/nocr/trec-robust-2004/fold4',
-    'trec-robust-2004-fold-5-20250926-test': 'disks45/nocr/trec-robust-2004/fold5',
-    'tiny-example-20251002_0-training': None
+    'trec-robust-2004-fold-5-20250926-test': 'disks45/nocr/trec-robust-2004/fold5'
 }
 
 IR_DATASET_TO_TIRA_DATASET = {v:k for k, v in TIRA_DATASET_ID_TO_IR_DATASET_ID.items()}
