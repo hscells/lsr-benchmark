@@ -32,7 +32,7 @@ def retrieve_command():
                 value = value.replace("/", "-")
 
             available_embeddings = all_embeddings()
-            if value in available_datasets:
+            if value in available_embeddings:
                 return "lightning-ir/" + value
 
             if os.path.isdir(value):
