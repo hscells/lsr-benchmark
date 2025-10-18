@@ -12,11 +12,12 @@ import gzip
 
 
 @retrieve_command()
-def main(dataset, embedding, output, k):
+@click.option("--use-u32", type=bool, required=False, default=False, help="Whether to use u32 for component ids, required for datasets with many components..")
+def main(dataset, embedding, output, k, use_u32):
     output.mkdir(parents=True, exist_ok=True)
     lsr_benchmark.register_to_ir_datasets(dataset)
     ir_dataset = ir_datasets.load(f"lsr-benchmark/{dataset}")
-    seismic_dataset = SeismicDataset()
+    seismic_dataset = SeismicDatasetLV() if use_u32 else SeismicDataset()
     register_metadata({"actor": {"team": "reneuir-baselines"}, "tag": f"naive_search-{embedding.replace('/', '-')}-{k}"})
     
     for (doc_id, tokens, values) in tqdm(ir_dataset.doc_embeddings(model_name=embedding), "create seismic dataset for naive search"):
