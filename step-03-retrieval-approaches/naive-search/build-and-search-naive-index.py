@@ -2,7 +2,7 @@
 import ir_datasets
 import lsr_benchmark
 import click
-from seismic import SeismicDataset
+from seismic import SeismicDataset, SeismicDatasetLV
 from tqdm import tqdm
 from tirex_tracker import tracking, ExportFormat, register_metadata
 from shutil import rmtree
