@@ -13,7 +13,7 @@
 
 [CLI](#command-line-tool)&emsp;•&emsp;[Python API](#cc-api)&emsp;•&emsp;[Citation](#citation)
 
-**Attention: This is very early work in progress.**
+**Attention: This is currently under review.**
 
 The lsr-benchmark aims to support holisitc evaluations of the learned sparse retrieval paradigm to contrast efficiency and effectiveness accross diverse retrieval scenarios.
 
