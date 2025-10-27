@@ -1,4 +1,4 @@
-__version__ = "0.0.1rc2"
+__version__ = "0.0.1rc3"
 import json
 from pathlib import Path
 from ir_datasets import registry
