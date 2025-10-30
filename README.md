@@ -57,9 +57,13 @@ pip3 install -e .[dev,test]
 pytest .
 ```
 
-# ToDo: Documentation
+# Documentation and Tutorials
 
-- Maik: Write how to add new datasets, embeddings, retrieval, evaluation
+We have a set of [tutorials available](tutorials).
+
+The `lsr-benchmark --help` command serves as entrypoint to the documentation.
+
+- ToDo: Write how to add new datasets, embeddings, retrieval, evaluation
   - short video
 
 # Data
