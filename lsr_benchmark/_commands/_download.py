@@ -4,15 +4,15 @@ from pathlib import Path
 from lsr_benchmark.datasets import all_embeddings, all_ir_datasets, IR_DATASET_TO_TIRA_DATASET
 from shutil import copytree
 
-@click.argument(
-    "dataset",
+@click.option(
+    "--dataset",
     type=click.Choice(all_ir_datasets()),
-    nargs=1,
+    required=True,
 )
-@click.argument(
-    "embedding",
+@click.option(
+    "--embedding",
     type=click.Choice(all_embeddings()),
-    nargs=1,
+    required=True,
 )
 @click.option(
     "-o", "--out",
@@ -22,7 +22,7 @@ from shutil import copytree
     default=None,
     help="The output directory to write to.",
 )
-def download(dataset, embedding, out):
+def download_embeddings(dataset, embedding, out):
     tira = Client()
     ret = tira.get_run_output(f'lsr-benchmark/lightning-ir/{embedding}', IR_DATASET_TO_TIRA_DATASET[dataset])
     if out is not None:

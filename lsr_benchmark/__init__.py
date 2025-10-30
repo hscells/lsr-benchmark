@@ -13,7 +13,8 @@ SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
 from ._commands._retrieval import retrieval
-from ._commands._download import download
+from ._commands._download import download_embeddings
+from .datasets import TIRA_DATASET_ID_TO_IR_DATASET_ID
 import os
 
 
@@ -90,7 +91,7 @@ def overview():
             overall_embeddings.add(embedding)
             model_to_size[embedding] = int(embedding_size) + model_to_size.get(embedding, 0)
 
-        df_dataset += [{"Dataset": dataset_id, "Text": f(int(stats['dataset-size'])), "Avg. Embeddings": f(embeddings_for_dataset/len(overall_embeddings))}]
+        df_dataset += [{"Dataset": TIRA_DATASET_ID_TO_IR_DATASET_ID.get(dataset_id, dataset_id), "Text": f(int(stats['dataset-size'])), "Avg. Embeddings": f(embeddings_for_dataset/len(overall_embeddings))}]
     df_dataset = pd.DataFrame(df_dataset)
     df_dataset.index = ['']*len(df_dataset)
     
@@ -102,9 +103,9 @@ def overview():
     df_embeddings = pd.DataFrame(df_embeddings)
     df_embeddings.index = ['']*len(df_embeddings)
 
-    print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset}\n\nEmbeddings:\n{df_embeddings}")
+    print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset.sort_values('Dataset')}\n\nEmbeddings:\n{df_embeddings}")
 
-main.command()(download)
+main.command()(download_embeddings)
 main.command()(evaluate)
 main.command()(retrieval)
 
