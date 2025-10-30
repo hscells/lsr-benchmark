@@ -13,8 +13,8 @@ SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
 from ._commands._retrieval import retrieval
-from ._commands._download import download_embeddings
-from .datasets import TIRA_DATASET_ID_TO_IR_DATASET_ID
+from ._commands._download import download_embeddings, download_run
+from .datasets import TIRA_DATASET_ID_TO_IR_DATASET_ID, IR_DATASET_TO_TIRA_DATASET
 import os
 
 
@@ -30,8 +30,13 @@ def register_to_ir_datasets(dataset=None):
 
             registry.register(dataset, ds)
             registry.register("lsr-benchmark/" + dataset, ds)
+    elif dataset and dataset in IR_DATASET_TO_TIRA_DATASET:
+        ds = build_dataset(IR_DATASET_TO_TIRA_DATASET[dataset], False)
+
+        registry.register(IR_DATASET_TO_TIRA_DATASET[dataset], ds)
+        registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset not in SUPPORTED_IR_DATASETS:
-        raise ValueError(f"Can not register {dataset}.")
+        raise ValueError(f"Can not register {dataset}. Supported are: {sorted(IR_DATASET_TO_TIRA_DATASET.keys())}")
     else:
         for k in SUPPORTED_IR_DATASETS:
             irds_id = f"lsr-benchmark/{k}/segmented"
@@ -106,6 +111,7 @@ def overview():
     print(f"Overview of the lsr-benchmark:\n\n\t- {overall_datasets} Datasets with {len(overall_embeddings)} pre-computed embeddings ({f(overall_size)})\n\nDatasets:\n{df_dataset.sort_values('Dataset')}\n\nEmbeddings:\n{df_embeddings}")
 
 main.command()(download_embeddings)
+main.command()(download_run)
 main.command()(evaluate)
 main.command()(retrieval)
 

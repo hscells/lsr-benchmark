@@ -87,6 +87,15 @@ def extracted_resource(irds_id: str, f) -> Path:
         raise ValueError("ToDo: finish refactoring")
 
 
+def _dowload_from_tira(ir_datasets_id, truth_dataset):
+    if os.path.isdir(ir_datasets_id):
+        return Path(ir_datasets_id)
+
+    from tira.rest_api_client import Client
+    tira = Client()
+    return tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=truth_dataset)
+
+
 class Segment(NamedTuple):
     offset_start: int
     offset_end: int
@@ -120,17 +129,15 @@ class LsrBenchmarkSegmentedDocument(NamedTuple):
 
 
 class LsrBenchmarkQueries(BaseQueries):
-    def __init__(self, queries_file, ir_datasets_id):
-        self.__queries_name = queries_file
+    def __init__(self, ir_datasets_id):
         self.__irds_id = ir_datasets_id
+        self.__queries_file = None
 
     def queries_iter(self):
-        if os.path.isfile(self.__queries_name):
-            queries_file = Path(self.__queries_name)
-        else:
-            queries_file = extracted_resource(self.__irds_id, "inputs") / self.__queries_name
+        if not self.__queries_file:
+            self.__queries_file = _dowload_from_tira(self.__irds_id, False) / "queries.jsonl"
 
-        for l in QueryProcessorFormat().all_lines(queries_file):
+        for l in QueryProcessorFormat().all_lines(self.__queries_file):
             yield GenericQuery(l["qid"], l["query"])
 
 
@@ -140,8 +147,8 @@ class LsrBenchmarkQueryEmbedding(NamedTuple):
 
 
 class LsrBenchmarkDocuments(BaseDocs):
-    def __init__(self, corpus_file, irds_id):
-        self.__corpus_file = corpus_file
+    def __init__(self, irds_id):
+        self.__corpus_file = None
         self.__docs = None
         self.__irds_id = irds_id
 
@@ -151,15 +158,13 @@ class LsrBenchmarkDocuments(BaseDocs):
 
     def docs(self):
         if not self.__docs:
-            if os.path.isfile(self.__corpus_file):
-                docs_file = Path(self.__corpus_file)
-            else:
-                docs_file = extracted_resource(self.__irds_id, "inputs") / self.__corpus_file
+            if not self.__corpus_file:
+                self.__corpus_file = _dowload_from_tira(self.__irds_id, False) / "corpus.jsonl.gz"
             reader = JsonlFormat()
             reader.apply_configuration_and_throw_if_invalid(
                 {"required_fields": ["doc_id", "segments"], "max_size_mb": 2500}
             )
-            self.__docs = reader.all_lines(docs_file)
+            self.__docs = reader.all_lines(self.__corpus_file)
         return self.__docs
 
     def docs_count(self):
@@ -177,29 +182,25 @@ class LsrBenchmarkSegmentedDocuments(LsrBenchmarkDocuments):
 
 
 class LsrBenchmarkDataset(Dataset):
-    def __init__(self, ir_datasets_id, docs=None, queries=None, qrels: "Optional[str]"=None, segmented=False, documentation=None):
+    def __init__(self, ir_datasets_id, segmented=False, documentation=None):
         self.__irds_id = ir_datasets_id
 
-        if queries:
-            queries = LsrBenchmarkQueries(queries, ir_datasets_id)
+        queries = LsrBenchmarkQueries(ir_datasets_id)
 
-        if qrels is None:
+        if in_tira_sandbox():
             qrels_obj = None
         else:
             class QrelsObj:
                 def stream(self):
-                    if os.path.isfile(qrels):
-                        qrels_file = Path(qrels)
-                    else:
-                        qrels_file = extracted_resource(ir_datasets_id, "truths") / qrels
+                    qrels_file = _dowload_from_tira(self.__irds_id, True) / "qrels.txt"
                     return qrels_file.open("rb")
 
             qrels_obj = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})
 
-        if docs and not segmented:
-            docs = LsrBenchmarkDocuments(docs, ir_datasets_id)
-        if docs and segmented:
-            docs = LsrBenchmarkSegmentedDocuments(docs, ir_datasets_id)
+        if segmented:
+            docs = LsrBenchmarkSegmentedDocuments(ir_datasets_id)
+        else:
+            docs = LsrBenchmarkDocuments(ir_datasets_id)
 
         super().__init__(docs, queries, qrels_obj, documentation)
         self.metadata = MetadataComponent(ir_datasets_id, self)
@@ -230,28 +231,7 @@ def build_dataset(ir_datasets_id: str, segmented: bool):
     except:
         pass
 
-    if ir_datasets_id in ir_datasets_from_tira(True):
-        from tira.rest_api_client import Client
-
-        tira = Client()
-        system_inputs = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=False)
-
-        docs = system_inputs / "corpus.jsonl.gz"
-        queries = system_inputs / "queries.jsonl"
-        qrels = None
-
-        if not in_tira_sandbox():
-            truths = tira.download_dataset(task=None, dataset=ir_datasets_id, truth_dataset=True)
-            qrels = truths / "qrels.txt"
-    else:
-        docs = "corpus.jsonl.gz"
-        queries = "queries.jsonl"
-        qrels = "qrels.txt" if not in_tira_sandbox() else None
-
     return LsrBenchmarkDataset(
         ir_datasets_id=ir_datasets_id,
-        docs=docs,
-        queries=queries,
-        qrels=qrels,
         segmented=segmented,
     )
