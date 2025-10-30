@@ -13,4 +13,5 @@ As the tutorials cover content of different stages of the `lsr-benchmark`, we re
 
 1. [tutorial-pre-computed-resources.ipynb](tutorial-pre-computed-resources.ipynb). Provides an overview of the pre-computed resources of the `lsr-benchmark` that you can re-use for your experiments and how to load and evaluate them.
 2. [tutorial-retrieval-engines.ipynb](tutorial-retrieval-engines.ipynb). **(Attention: In Progress.)** Shows the basic interface that retrieval engines in the lsr-benchmark should fulfill and how you can evaluate your own implementations against existing runs.
-3. [tutorial-embedding-models.ipynb](tutorial-embedding-models.ipynb). **(Attention: In Progress.)** Shows the basic interface that embedding systems in the lsr-benchmark should fulfill and how you can evaluate your own embeddings against existing ones.
+3. [tutorial-access-raw-data.ipynb](tutorial-access-raw-data.ipynb) Shows how to access the raw underlying data before embedding.
+4. [tutorial-embedding-models.ipynb](tutorial-embedding-models.ipynb). **(Attention: In Progress.)** Shows the basic interface that embedding systems in the lsr-benchmark should fulfill and how you can evaluate your own embeddings against existing ones.
