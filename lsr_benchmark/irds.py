@@ -192,7 +192,7 @@ class LsrBenchmarkDataset(Dataset):
         else:
             class QrelsObj:
                 def stream(self):
-                    qrels_file = _dowload_from_tira(self.__irds_id, True) / "qrels.txt"
+                    qrels_file = _dowload_from_tira(ir_datasets_id, True) / "qrels.txt"
                     return qrels_file.open("rb")
 
             qrels_obj = TrecQrels(QrelsObj(), {0: "Not Relevant", 1: "Relevant"})

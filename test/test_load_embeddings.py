@@ -12,7 +12,7 @@ class TestLoadEmbeddings(unittest.TestCase):
         irds = ir_datasets.load("lsr-benchmark/msmarco-passage/trec-dl-2019/judged")
 
         doc_embeddings = irds.doc_embeddings(model_name="lightning-ir/webis/splade")
-        query_embeddings = irds.doc_embeddings(model_name="lightning-ir/webis/splade")
+        query_embeddings = irds.query_embeddings(model_name="lightning-ir/webis/splade")
 
         self.assertIsNotNone(doc_embeddings)
         self.assertIsNotNone(query_embeddings)
@@ -22,7 +22,7 @@ class TestLoadEmbeddings(unittest.TestCase):
         irds = ir_datasets.load("lsr-benchmark/disks45/nocr/trec-robust-2004/fold1")
 
         doc_embeddings = irds.doc_embeddings(model_name="lightning-ir/webis/splade")
-        query_embeddings = irds.doc_embeddings(model_name="lightning-ir/webis/splade")
+        query_embeddings = irds.query_embeddings(model_name="lightning-ir/webis/splade")
 
         self.assertIsNotNone(doc_embeddings)
         self.assertIsNotNone(query_embeddings)

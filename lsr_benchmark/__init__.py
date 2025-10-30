@@ -31,10 +31,12 @@ def register_to_ir_datasets(dataset=None):
             registry.register(dataset, ds)
             registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset in IR_DATASET_TO_TIRA_DATASET:
-        ds = build_dataset(IR_DATASET_TO_TIRA_DATASET[dataset], False)
-
-        registry.register(IR_DATASET_TO_TIRA_DATASET[dataset], ds)
-        registry.register("lsr-benchmark/" + dataset, ds)
+        if ("lsr-benchmark/" + dataset) not in registry:
+            ds = build_dataset(IR_DATASET_TO_TIRA_DATASET[dataset], False)
+            
+            if IR_DATASET_TO_TIRA_DATASET[dataset] not in registry:
+                registry.register(IR_DATASET_TO_TIRA_DATASET[dataset], ds)
+            registry.register("lsr-benchmark/" + dataset, ds)
     elif dataset and dataset not in SUPPORTED_IR_DATASETS:
         raise ValueError(f"Can not register {dataset}. Supported are: {sorted(IR_DATASET_TO_TIRA_DATASET.keys())}")
     else:
