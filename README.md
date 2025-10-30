@@ -46,6 +46,17 @@ pip3 install git+https://github.com/reneuir/lsr-benchmark.git
 
 Please run `lsr-benchmark overview` for an up-to-date overview over all datasets and all embeddings.
 
+# Running Tests
+
+We have a suite of unit tests that you can run via:
+
+```
+# first install the local version of the lsr-benchmark
+pip3 install -e .[dev,test]
+# then run the unit tests
+pytest .
+```
+
 # ToDo: Documentation
 
 - Maik: Write how to add new datasets, embeddings, retrieval, evaluation

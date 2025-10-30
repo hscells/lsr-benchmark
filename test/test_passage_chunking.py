@@ -11,6 +11,11 @@ def load_docs():
     return ret
 
 class TestPassageChunking(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import spacy.cli
+        spacy.cli.download("en_core_web_sm")
+
     def test_load_docs(self):
         docs = load_docs()
         self.assertIsNotNone(docs)
