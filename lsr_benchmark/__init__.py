@@ -7,8 +7,6 @@ from lsr_benchmark.corpus import materialize_corpus, materialize_queries, materi
 from click import group, argument
 import lsr_benchmark.click
 
-from tirex_tracker import tracking, ExportFormat
-
 SUPPORTED_IR_DATASETS = MAPPING_OF_DATASET_IDS.keys()
 
 from ._commands._evaluate import evaluate
@@ -60,6 +58,7 @@ def main():
 
 
 def create_subsampled_corpus(directory, config):
+    from tirex_tracker import tracking, ExportFormat
     target_directory = directory
 
     target_directory.mkdir(exist_ok=True)
