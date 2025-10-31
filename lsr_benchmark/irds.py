@@ -105,14 +105,19 @@ class Segment(NamedTuple):
 class LsrBenchmarkDocument(NamedTuple):
     doc_id: str
     segments: List[Segment]
+    text: str
 
     @staticmethod
     def _from_json(json_doc):
         segments = [Segment(int(i["start"]), int(i["end"]), i["text"]) for i in json_doc["segments"]]
-        return LsrBenchmarkDocument(json_doc["doc_id"], segments)
+        return LsrBenchmarkDocument(json_doc["doc_id"], segments, LsrBenchmarkDocument._default_text(segments))
+
+    @staticmethod
+    def _default_text(segments):
+        return "" if len(segments) == 0 else segments[0].text
 
     def default_text(self):
-        return "" if len(self.segments) == 0 else self.segments[0].text
+        return LsrBenchmarkDocument._default_text(self.segments)
 
 
 class LsrBenchmarkDocumentEmbedding(NamedTuple):
@@ -126,6 +131,7 @@ class LsrBenchmarkSegmentedDocument(NamedTuple):
 
     def default_text(self):
         return self.segment.text
+
 
 
 class LsrBenchmarkQueries(BaseQueries):
